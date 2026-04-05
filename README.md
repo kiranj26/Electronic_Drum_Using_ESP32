@@ -71,18 +71,8 @@ Web Audio API plays drum sound
 ## Demo
 
 ### Phase 1 — Physical Buttons Demo
-
-> 📹 **Video coming soon** — replace this line with your video once recorded
->
-> To record: open QuickTime → File → New Screen Recording (or New Movie Recording for camera)
-> Upload to GitHub by dragging the video file directly into this README on github.com
-
-<!-- PLACEHOLDER: drag and drop your demo video here on GitHub -->
-
 ![Phase 1 Demo](docs/assets/phase1_demo.gif)
-
-<!-- If uploading a video file directly, use this instead: -->
-<!-- https://github.com/kiranj26/Electronic_Drum_Using_ESP32/assets/YOUR_USER_ID/YOUR_VIDEO_ID -->
+https://github.com/user-attachments/assets/dd6a18f4-1137-4b9d-854d-ca3681d37620
 
 ---
 

@@ -12,7 +12,7 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 
 | Phase | Name | Branch | Hardware | Status |
 |-------|------|--------|----------|--------|
-| 0 | UART + Browser MVP | `phase-0-mvp` | ESP32 + USB only | In Progress |
+| 0 | UART + Browser MVP | `phase-0-mvp` | ESP32 + USB only | **Complete** |
 | 1 | Physical Buttons → UART → Browser | `phase-1-buttons` | + 8 buttons | Not started |
 | 2 | On-Device I2S Audio | `phase-2-i2s-audio` | + MAX98357A + SD card + speaker | Not started |
 | 3 | Polyphony + FreeRTOS | `phase-3-polyphony` | Same as Phase 2 | Not started |
@@ -181,12 +181,12 @@ struct Voice {
 
 ## Testing Checklist by Phase
 
-### Phase 0
-- [ ] Web app connects to ESP32 serial port in Chrome
-- [ ] Typing `KICK` in Serial Monitor plays kick sound in browser
-- [ ] All 8 command strings trigger correct sounds
-- [ ] On-screen pads work without ESP32 (standalone test mode)
-- [ ] No audio glitches or latency > 200ms (browser is relaxed vs hardware)
+### Phase 0 — COMPLETE ✓
+- [x] Web app connects to ESP32 serial port in Chrome
+- [x] Typing `KICK` in Serial Monitor plays kick sound in browser
+- [x] All 8 command strings trigger correct sounds
+- [x] On-screen pads work without ESP32 (standalone test mode)
+- [x] No audio glitches or latency > 200ms (browser is relaxed vs hardware)
 
 ### Phase 1 (future)
 - [ ] All 8 buttons register within 1ms of press

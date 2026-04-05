@@ -130,7 +130,7 @@ Electronic_Drum_Using_ESP32/
 
 | Phase | Status | Branch |
 |-------|--------|--------|
-| Phase 0 — UART + Browser MVP | In Progress | `phase-0-mvp` |
+| Phase 0 — UART + Browser MVP | **Complete** | `phase-0-mvp` |
 | Phase 1 — Physical Buttons | Not started | `phase-1-buttons` |
 | Phase 2 — On-Device I2S Audio | Not started | `phase-2-i2s-audio` |
 | Phase 3 — Polyphony + RTOS | Not started | `phase-3-polyphony` |

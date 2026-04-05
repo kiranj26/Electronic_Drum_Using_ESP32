@@ -49,9 +49,8 @@ bool is_valid_command(const String& s) {
 
 void setup() {
   Serial.begin(BAUD_RATE);
-  while (!Serial) { ; }  // wait until Serial port is ready
+  while (!Serial) { ; }
 
-  // Lines starting with # are ignored by the web app
   Serial.println("# ESP32 Drum Kit — Phase 0 ready");
   Serial.println("# Keys: 1=KICK  2=SNARE  3=HIHAT_CLOSED  4=HIHAT_OPEN");
   Serial.println("#       5=TOM_LOW  6=TOM_MID  7=CRASH  8=RIDE");
@@ -66,13 +65,11 @@ void loop() {
 
   if (input.length() == 0) return;
 
-  // Accept full command strings typed directly (e.g. KICK)
   if (is_valid_command(input)) {
     Serial.println(input);
     return;
   }
 
-  // Accept single-character shortcuts
   if (input.length() == 1) {
     char key = input.charAt(0);
     for (uint8_t i = 0; i < DRUM_MAP_SIZE; i++) {
@@ -83,7 +80,6 @@ void loop() {
     }
   }
 
-  // Unknown input — echo as a comment so it shows in the log but doesn't trigger a sound
   Serial.print("# unknown input: ");
   Serial.println(input);
 }

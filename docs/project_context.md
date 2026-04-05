@@ -1,68 +1,168 @@
 # ESP32 Digital Drum Kit — Project Context
 
 ## What This Project Is
-A physical electronic drum kit using an ESP32-M1 DevKit as the brain. The user presses tactile push buttons wired to GPIO pins. Each button press triggers a WAV drum sample that is mixed polyphonically and output through an I2S amplifier (MAX98357A) to a speaker.
+A progressive drum kit project that starts with zero extra hardware and adds capability phase by phase. The end goal is a standalone physical instrument, but the first deliverable is a fully working browser-based drum machine driven by an ESP32 over USB — no extra components needed.
 
-The goal is a real instrument — latency must stay under 10ms end-to-end, which is the threshold where human musicians perceive delay as "wrong."
+## The Problem with Starting at the End
+The full system requires: MAX98357A amplifier, SD card module, 8 buttons, speaker, OLED, enclosure.  
+Right now we only have an **ESP32-M1 DevKit and a USB cable**.
 
-## Why This Approach
-- **ESP32** chosen for dual-core architecture: one core handles audio DMA, other handles button input. No scheduling conflicts.
-- **I2S + MAX98357A** chosen over PWM audio for cleaner analog output and DMA support (zero CPU load for audio streaming).
-- **SD card** preferred over internal SPIFFS for sample storage — gives room to expand sample library later without reflashing.
-- **Interrupt-driven buttons** (not polled) to minimize input latency to <1ms.
-- **Software debounce** preferred over hardware RC filter for flexibility and zero extra BOM cost.
+Rather than block on hardware procurement, we use the ESP32's USB/Serial connection to a Chrome web app that handles all audio. This is Phase 0.
 
-## Current Status
-- [ ] Phase 1: Hardware wiring + single WAV playback test
-- [ ] Phase 2: Button input + debounce
-- [ ] Phase 3: Polyphonic mixer (4+ voices)
-- [ ] Phase 4: All 8 buttons + all 8 samples mapped
-- [ ] Phase 5: OLED display + kit switching
-- [ ] Phase 6: Enclosure build
-- [ ] Phase 7: Latency testing + tuning
+---
 
-## Key Technical Decisions Made
+## Phase 0 — UART + Web Browser MVP
+
+### Why This Approach
+- **Zero extra hardware** — ESP32 + USB cable is all that's needed
+- **Web Serial API** (Chrome-only) lets the browser open a serial port — no drivers, no Node.js, no Electron
+- **Web Audio API** handles sample playback — low latency, no installs, works offline
+- **Identical command protocol** to what Phase 1 will use — so firmware changes are additive, not rewrites
+- **Standalone test mode** — browser app works without ESP32 connected (click pads with mouse)
+
+### Architecture
+```
+ESP32 Firmware
+  └── Serial.println("KICK")   ← 115200 baud UART over USB
+          |
+     USB cable
+          |
+Chrome Web App (index.html)
+  ├── Web Serial API            ← reads serial port, parses command strings
+  └── Web Audio API             ← decodes WAV buffers, plays on trigger
+```
+
+### Command Protocol
+Newline-terminated uppercase strings. Simple, human-readable, easy to test in Serial Monitor.
+
+```
+KICK
+SNARE
+HIHAT_CLOSED
+HIHAT_OPEN
+TOM_LOW
+TOM_MID
+CRASH
+RIDE
+```
+
+ESP32 firmware in Phase 0 acts as a "command echo" — you type in Serial Monitor, it echoes the canonical command. In Phase 1, buttons replace typing.
+
+### Files
+```
+firmware/phase0/phase0.ino   ← reads Serial, echoes drum commands
+web_app/phase0/index.html    ← Chrome app, self-contained
+web_app/phase0/app.js        ← Web Serial + Web Audio logic
+web_app/phase0/styles.css    ← drum pad UI
+web_app/phase0/samples/      ← WAV files (22050Hz 16-bit mono)
+```
+
+### Limitations Accepted in Phase 0
+- Audio plays in browser, not from ESP32 — requires laptop to be open during play
+- Latency is browser-dependent (~20–100ms, not the 10ms target) — this is fine for Phase 0
+- No physical buttons — input is Serial Monitor or on-screen click
+- Chrome-only (Web Serial API not in Firefox/Safari)
+
+---
+
+## Phase 1 — Physical Buttons (next)
+
+### What Changes
+- Wire 8 tactile buttons to GPIO 4, 5, 12, 13, 14, 15, 18, 19
+- Firmware adds ISR on FALLING edge per button
+- Software debounce: 30ms minimum gap per button
+- Firmware sends the same command strings as Phase 0 — browser app unchanged
+- Latency improves: button → ISR → UART → browser → audio (~30–60ms)
+
+### What Stays the Same
+- Browser web app (zero changes)
+- Command protocol (zero changes)
+- Serial baud rate (zero changes)
+
+---
+
+## Phase 2 — On-Device I2S Audio
+
+### What Changes
+- Add MAX98357A I2S amplifier and SD card module
+- WAV samples stored on SD, streamed and polyphonically mixed on ESP32
+- I2S output replaces browser audio — PC no longer required during play
+- FreeRTOS task split: AudioMixTask on Core 0, InputTask on Core 1
+- Latency target: < 10ms (hard requirement for real performance feel)
+- Browser app becomes a companion tool (visualization, MIDI, kit editor) rather than the primary audio output
+
+---
+
+## Key Decisions Log
+
 | Decision | Choice | Reason |
 |----------|--------|--------|
-| Audio interface | I2S (not PWM, not DAC) | Clean audio, DMA support |
-| Amplifier | MAX98357A | Cheap, easy, I2S native |
-| Sample format | 22050Hz 16-bit mono WAV | Fits in SPIFFS, low CPU decode |
+| Phase 0 audio | Browser (Web Audio API) | No hardware needed |
+| Phase 0 transport | USB Serial / UART | Built into every ESP32 DevKit |
+| Phase 0 interface | Chrome Web Serial API | No drivers, no install, works from a local HTML file |
+| Phase 1+ audio | On-device I2S → MAX98357A | Clean audio, DMA, standalone |
+| Sample format | 22050Hz 16-bit mono WAV | Fits SPIFFS, low decode cost |
 | Input method | ISR FALLING edge | Lowest latency |
-| Debounce | Software (20–50ms) | No extra components |
-| Polyphony | 32-bit accumulator mix | Prevents clipping on simultaneous hits |
-| RTOS | FreeRTOS (built into ESP32) | Audio Core 0, Input Core 1 |
+| Debounce | Software 30ms | No extra components |
+| Polyphony (Phase 3) | 32-bit accumulator mix | Prevents clipping on simultaneous hits |
 
-## Constraints
-- Must work on ESP32-M1 DevKit (not ESP32-S2, S3, or C3 — those have different I2S and GPIO)
-- Total RAM budget: 520KB SRAM. Voice buffers + WAV headers must fit.
-- Target cost: ~$28–40 total BOM
-- Target latency: < 10ms button press to audible sound (hard requirement)
+---
 
-## Drum Pad Layout (8 buttons)
+## Hardware Procurement Plan
+
+| Item | Needed by | Est. Cost | Where to buy |
+|------|-----------|----------|-------------|
+| 8x tactile push buttons | Phase 1 | ~$3 | Amazon, AliExpress |
+| Jumper wires (M-M) | Phase 1 | ~$2 | Amazon |
+| MAX98357A I2S amp module | Phase 2 | ~$3 | Amazon, Adafruit |
+| SD card module (SPI) | Phase 2 | ~$2 | Amazon |
+| MicroSD card 4–8GB | Phase 2 | ~$5 | Amazon |
+| Speaker 3W 8Ω | Phase 2 | ~$4 | Amazon, Adafruit |
+| OLED 0.96" I2C SSD1306 | Phase 4 | ~$4 | Amazon |
+| Project enclosure | Phase 5 | ~$5–15 | Amazon, Hammond |
+
+**Total Phase 1 upgrade cost: ~$5**  
+**Total full build cost: ~$28–40**
+
+---
+
+## Drum Pad Mapping (consistent across all phases)
+
+| Pad | Command | GPIO (Phase 1+) | Color suggestion |
+|-----|---------|-----------------|-----------------|
+| Kick | `KICK` | GPIO 4 | Red |
+| Snare | `SNARE` | GPIO 5 | White |
+| Hi-Hat Closed | `HIHAT_CLOSED` | GPIO 12 | Yellow |
+| Hi-Hat Open | `HIHAT_OPEN` | GPIO 13 | Yellow |
+| Low Tom | `TOM_LOW` | GPIO 14 | Blue |
+| Mid Tom | `TOM_MID` | GPIO 15 | Blue |
+| Crash | `CRASH` | GPIO 18 | Orange |
+| Ride | `RIDE` | GPIO 19 | Orange |
+
+---
+
+## Branching Strategy
+
 ```
-[Crash]  [Ride]
-[HH-O]  [HH-C]
-[Tom-L] [Tom-M]
-[Snare]  [Kick]
+main
+ └── phase-0-mvp          ← current branch
+      └── phase-1-buttons  ← branches when phase-0-mvp merges to main
+           └── phase-2-i2s-audio
+                └── phase-3-polyphony
+                     └── phase-4-display
+                          └── phase-5-enclosure
 ```
 
-## Sample Files Required
-Place on SD card root or SPIFFS root:
-- `kick.wav`
-- `snare.wav`
-- `hihat_closed.wav`
-- `hihat_open.wav`
-- `tom_low.wav`
-- `tom_mid.wav`
-- `crash.wav`
-- `ride.wav`
+Each phase branch is a PR back to `main` when fully tested.  
+Never develop directly on `main`.
 
-Format: WAV, PCM, 16-bit, mono, 22050 Hz. Convert with Audacity if needed.
+---
 
-## Pair Programming Notes (for Claude)
-- The developer is building this from scratch — start with Phase 1 and work sequentially.
-- Always check the GPIO pin map before suggesting wiring or code pin assignments.
-- Keep ISRs minimal (`IRAM_ATTR`, flag-only, no Serial or I/O).
-- The `Voice` struct is the core audio primitive — don't change its shape without considering the mixer.
-- When writing firmware code, default to PlatformIO project structure unless told otherwise.
-- Do not use `delay()` in any audio or input path.
+## Audio Sample Sources (Phase 0)
+Get free WAV samples before starting:
+- freesound.org (search "kick drum wav", filter by license)
+- sampleswap.org (free drum kit packs)
+- Convert to 22050Hz 16-bit mono WAV using Audacity
+
+Place files in `web_app/phase0/samples/` with exact filenames:  
+`kick.wav`, `snare.wav`, `hihat_closed.wav`, `hihat_open.wav`, `tom_low.wav`, `tom_mid.wav`, `crash.wav`, `ride.wav`

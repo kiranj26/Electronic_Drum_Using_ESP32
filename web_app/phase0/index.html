@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP32 Drum Kit — Phase 0</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <h1>ESP32 Drum Kit</h1>
+
+  <div class="toolbar">
+    <div class="status">
+      <div id="status-dot" class="dot"></div>
+      <span id="status-label">Not connected</span>
+    </div>
+    <button id="btn-connect">Connect to ESP32</button>
+  </div>
+
+  <div class="drum-grid">
+    <div class="pad" id="pad-crash"        data-pad="crash">
+      Crash <span class="key-hint">7 / c</span>
+    </div>
+    <div class="pad" id="pad-ride"         data-pad="ride">
+      Ride <span class="key-hint">8 / r</span>
+    </div>
+    <div class="pad" id="pad-hihat_open"   data-pad="hihat_open">
+      HH Open <span class="key-hint">4 / H</span>
+    </div>
+    <div class="pad" id="pad-hihat_closed" data-pad="hihat_closed">
+      HH Closed <span class="key-hint">3 / h</span>
+    </div>
+    <div class="pad" id="pad-tom_low"      data-pad="tom_low">
+      Tom Low <span class="key-hint">5 / t</span>
+    </div>
+    <div class="pad" id="pad-tom_mid"      data-pad="tom_mid">
+      Tom Mid <span class="key-hint">6 / T</span>
+    </div>
+    <div class="pad" id="pad-snare"        data-pad="snare">
+      Snare <span class="key-hint">2 / s</span>
+    </div>
+    <div class="pad" id="pad-kick"         data-pad="kick">
+      Kick <span class="key-hint">1 / k</span>
+    </div>
+  </div>
+
+  <div class="log-panel">
+    <h2>Serial Log</h2>
+    <div id="log"></div>
+  </div>
+
+  <p class="hints">
+    Click pads or press keys (1–8 / k s h H t T c r) &nbsp;·&nbsp;
+    Connect ESP32 over USB for Serial trigger &nbsp;·&nbsp;
+    Chrome only
+  </p>
+
+  <script src="app.js"></script>
+</body>
+</html>

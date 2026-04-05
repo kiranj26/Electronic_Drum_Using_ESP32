@@ -1,0 +1,3 @@
+# WAV files are not checked into git — too large and user-sourced.
+# See GETTING_STARTED.md Part 6 for instructions on where to download them.
+*.wav

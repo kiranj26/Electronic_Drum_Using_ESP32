@@ -1,0 +1,158 @@
+/* ── Reset & Base ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0f0f0f;
+  color: #e0e0e0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  gap: 24px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+/* ── Toolbar ──────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #444;
+  transition: background 0.3s;
+}
+
+.dot.connected { background: #22c55e; }
+
+button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2563eb;
+  color: #fff;
+  transition: background 0.15s, transform 0.1s;
+}
+
+button:hover  { background: #1d4ed8; }
+button:active { transform: scale(0.97); }
+
+/* ── Drum Grid ────────────────────────────────────── */
+.drum-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.pad {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 2px solid transparent;
+  transition: filter 0.1s, transform 0.08s, border-color 0.1s;
+}
+
+.pad:hover  { filter: brightness(1.15); }
+.pad:active { transform: scale(0.94); }
+
+.pad.active {
+  filter: brightness(1.5);
+  border-color: rgba(255,255,255,0.6);
+  transform: scale(0.96);
+}
+
+.pad.no-sample {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pad .key-hint {
+  font-size: 0.65rem;
+  opacity: 0.65;
+  font-weight: 400;
+}
+
+/* Pad colors */
+.pad[data-pad="kick"]         { background: #7f1d1d; color: #fecaca; }
+.pad[data-pad="snare"]        { background: #374151; color: #f3f4f6; }
+.pad[data-pad="hihat_closed"] { background: #713f12; color: #fef08a; }
+.pad[data-pad="hihat_open"]   { background: #854d0e; color: #fef08a; }
+.pad[data-pad="tom_low"]      { background: #1e3a5f; color: #bfdbfe; }
+.pad[data-pad="tom_mid"]      { background: #1e3a5f; color: #bfdbfe; }
+.pad[data-pad="crash"]        { background: #4a1d96; color: #ddd6fe; }
+.pad[data-pad="ride"]         { background: #4a1d96; color: #ddd6fe; }
+
+/* ── Log ──────────────────────────────────────────── */
+.log-panel {
+  width: 100%;
+  max-width: 600px;
+}
+
+.log-panel h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+#log {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  color: #6ee7b7;
+  height: 160px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#log div { line-height: 1.4; }
+
+/* ── Hint bar ─────────────────────────────────────── */
+.hints {
+  font-size: 0.75rem;
+  color: #444;
+  text-align: center;
+}

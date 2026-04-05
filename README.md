@@ -71,7 +71,7 @@ Web Audio API plays drum sound
 ## Demo
 
 ### Phase 1 — Physical Buttons Demo
-![Phase 1 Demo](docs/assets/phase1_demo.gif)
+
 https://github.com/user-attachments/assets/dd6a18f4-1137-4b9d-854d-ca3681d37620
 
 ---

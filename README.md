@@ -7,7 +7,7 @@ Each phase adds capability — from a zero-hardware browser demo all the way to 
 
 ## Project Phases
 
-### Phase 0 — UART + Web Browser MVP ← **(current)**
+### Phase 0 — UART + Web Browser MVP ✅ Complete
 **Branch:** `phase-0-mvp`  
 **Hardware needed:** ESP32-M1 DevKit + USB cable (nothing else)
 
@@ -33,17 +33,56 @@ No amplifier. No buttons. No SD card. Just a USB cable and a browser.
 
 ---
 
-### Phase 1 — Physical Buttons → UART → Browser
+### Phase 1 — Physical Buttons → UART → Browser ✅ Complete
 **Branch:** `phase-1-buttons`  
-**Hardware needed:** Phase 0 + 8 tactile push buttons + jumper wires
+**Hardware needed:** Phase 0 + 7 tactile push buttons + jumper wires + breadboard
 
-Wire 8 buttons to ESP32 GPIO pins. Each button press sends a drum command string over UART. The browser still handles all audio — no amplifier needed yet.
+7 buttons wired to ESP32 GPIO pins via breadboard. Each button press triggers a hardware interrupt on the ESP32, which sends a drum command string over UART to the Chrome web app. 10ms software debounce.
 
-**Goal:** Real physical drum pads triggering browser audio. Latency test vs Phase 0.
+**How it works:**
+```
+Physical button press
+        ↓
+ESP32 GPIO interrupt (FALLING edge, IRAM_ATTR ISR)
+        ↓
+10ms debounce check
+        ↓
+Serial.println("KICK") over USB
+        ↓
+Chrome Web Serial API reads it
+        ↓
+Web Audio API plays drum sound
+```
+
+**GPIO map:**
+| GPIO | Drum |
+|------|------|
+| 4 | KICK |
+| 5 | SNARE |
+| 12 | HIHAT_CLOSED |
+| 13 | HIHAT_OPEN |
+| 14 | TOM_LOW |
+| 15 | TOM_MID |
+| 18 | CRASH |
 
 **Deliverables:**
 - `firmware/phase1/` — Button ISR + debounce + UART output
-- `web_app/phase1/` — Same browser app, improved UI showing pad indicators
+
+## Demo
+
+### Phase 1 — Physical Buttons Demo
+
+> 📹 **Video coming soon** — replace this line with your video once recorded
+>
+> To record: open QuickTime → File → New Screen Recording (or New Movie Recording for camera)
+> Upload to GitHub by dragging the video file directly into this README on github.com
+
+<!-- PLACEHOLDER: drag and drop your demo video here on GitHub -->
+
+![Phase 1 Demo](docs/assets/phase1_demo.gif)
+
+<!-- If uploading a video file directly, use this instead: -->
+<!-- https://github.com/kiranj26/Electronic_Drum_Using_ESP32/assets/YOUR_USER_ID/YOUR_VIDEO_ID -->
 
 ---
 
@@ -131,7 +170,7 @@ Electronic_Drum_Using_ESP32/
 | Phase | Status | Branch |
 |-------|--------|--------|
 | Phase 0 — UART + Browser MVP | **Complete** | `phase-0-mvp` |
-| Phase 1 — Physical Buttons | Not started | `phase-1-buttons` |
+| Phase 1 — Physical Buttons | **Complete** | `phase-1-buttons` |
 | Phase 2 — On-Device I2S Audio | Not started | `phase-2-i2s-audio` |
 | Phase 3 — Polyphony + RTOS | Not started | `phase-3-polyphony` |
 | Phase 4 — OLED + Kit Switch | Not started | `phase-4-display` |

@@ -60,6 +60,10 @@ Web Audio API resumes + plays drum sound on phone speaker
 
 <!-- PLACEHOLDER: paste your Phase 2 demo video here -->
 
+https://github.com/user-attachments/assets/d413f8be-6853-4fed-81b4-6168fe795195
+
+
+
 #### How to Reproduce Phase 2
 
 **What you need:**

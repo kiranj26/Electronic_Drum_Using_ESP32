@@ -40,7 +40,7 @@ ESP32 → Serial.println("KICK") → USB → Chrome Web Serial API → Web Audio
 
 ---
 
-## Phase 2 — WiFi AP + WebSocket → iPhone Audio 🔄 IN PROGRESS
+## Phase 2 — WiFi AP + WebSocket → iPhone Audio ✓ COMPLETE
 
 ### The Problem Phase 2 Solves
 Phase 1 still requires a USB cable to a laptop. The user has an iPhone and wants zero cables, zero laptop, zero router. Just press a button and hear sound on the phone.
@@ -132,6 +132,7 @@ Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. N
 | Phase 2 wireless | WiFi AP mode | No router, no Bluetooth lag, no extra hardware |
 | Phase 2 transport | WebSocket | Real-time push, works on iPhone Safari |
 | Phase 2 WAV delivery | Base64 in HTML | Single file, no SPIFFS complexity |
+| iOS AudioContext fix | resume() before every play() | iOS suspends AudioContext when page not touched — WebSocket triggers were silent without this |
 | Sample format | 22050Hz 16-bit mono WAV | Compact, low decode cost |
 
 ---
@@ -173,7 +174,7 @@ Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. N
 main
  ├── phase-0-mvp       ✅ merged
  ├── phase-1-buttons   ✅ merged
- ├── phase-2-wifi-ap   🔄 current
+ ├── phase-2-wifi-ap   ✅ merged
  ├── phase-3-polyphony
  ├── phase-4-i2s-audio
  ├── phase-5-display

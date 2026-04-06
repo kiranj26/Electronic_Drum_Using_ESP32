@@ -3,8 +3,8 @@
 ## TL;DR — What We're Building
 A progressive drum kit project. We start with zero extra hardware (just ESP32 + USB cable + browser) and add capability phase by phase until we have a fully wireless, standalone physical instrument.
 
-**Current phase: Phase 2 — WiFi AP + WebSocket + Phone Audio (Complete)**
-**Current branch: `phase-2-wifi-ap`**
+**Current phase: Phase 3 — Polyphony + FreeRTOS (next up)**
+**Last completed: Phase 2 — WiFi AP + WebSocket + iPhone Audio**
 
 ---
 
@@ -74,7 +74,7 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 
 ---
 
-## Phase 2 — WiFi AP + WebSocket → Phone Audio (CURRENT)
+## Phase 2 — WiFi AP + WebSocket → Phone Audio ✅ COMPLETE
 
 ### Goal
 Completely wireless. No USB cable. No laptop. Press a button → iPhone plays drum sound.
@@ -228,7 +228,7 @@ struct Voice {
 - `main` — stable, tagged releases only
 - Each phase has its own branch, branched from main after previous phase merges
 - PRs go: `phase-N` → `main` when phase is fully working and tested
-- Current branch: `phase-2-wifi-ap`
+- Next branch: `phase-3-polyphony` (branches from main)
 
 ## Audio Sample Spec
 - Format: WAV, PCM, uncompressed

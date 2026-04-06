@@ -216,11 +216,20 @@
   function play(pad_id) {
     const buf = audioBuffers[pad_id];
     if (!buf || !audioCtx) return;
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf;
-    src.connect(audioCtx.destination);
-    src.start(0);
-    flash(pad_id);
+    // iOS suspends AudioContext when page is not being touched —
+    // resume it before every play so WebSocket triggers work
+    const do_play = () => {
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+      flash(pad_id);
+    };
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().then(do_play);
+    } else {
+      do_play();
+    }
   }
 
   // ── WebSocket ──────────────────────────────────────────────

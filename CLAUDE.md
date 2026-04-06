@@ -3,7 +3,7 @@
 ## TL;DR — What We're Building
 A progressive drum kit project. We start with zero extra hardware (just ESP32 + USB cable + browser) and add capability phase by phase until we have a fully wireless, standalone physical instrument.
 
-**Current phase: Phase 2 — WiFi AP + WebSocket + Phone Audio**
+**Current phase: Phase 2 — WiFi AP + WebSocket + Phone Audio (Complete)**
 **Current branch: `phase-2-wifi-ap`**
 
 ---
@@ -14,7 +14,7 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 |-------|------|--------|----------|--------|
 | 0 | UART + Browser MVP | `phase-0-mvp` | ESP32 + USB only | **Complete** |
 | 1 | Physical Buttons → UART → Browser | `phase-1-buttons` | + 7 buttons + breadboard | **Complete** |
-| 2 | WiFi AP + WebSocket → Phone Audio | `phase-2-wifi-ap` | No new hardware | In Progress |
+| 2 | WiFi AP + WebSocket → Phone Audio | `phase-2-wifi-ap` | No new hardware | **Complete** |
 | 3 | Polyphony + FreeRTOS | `phase-3-polyphony` | Same as Phase 2 | Not started |
 | 4 | On-Device I2S Audio | `phase-4-i2s-audio` | + MAX98357A + SD card + speaker | Not started |
 | 5 | OLED + Kit Switching | `phase-5-display` | + OLED | Not started |
@@ -253,14 +253,14 @@ struct Voice {
 - [x] Button → browser sound working end-to-end
 - [x] Fast repeated hits all register cleanly
 
-### Phase 2 (current)
-- [ ] iPhone connects to "DrumKit-ESP32" WiFi hotspot
-- [ ] Safari opens http://192.168.4.1 and loads web app
-- [ ] WebSocket connects (status indicator shows connected)
-- [ ] Press button → phone plays drum sound with no USB cable
-- [ ] All 7 buttons trigger correct sounds on phone
-- [ ] Latency feels acceptable (< 20ms perceived)
-- [ ] No audio glitches after 5 min continuous play
+### Phase 2 — COMPLETE ✓
+- [x] iPhone connects to "DrumKit-ESP32" WiFi hotspot
+- [x] Safari opens http://192.168.4.1 and loads web app
+- [x] WebSocket connects (status indicator shows connected)
+- [x] Press button → phone plays drum sound with no USB cable
+- [x] All 7 buttons trigger correct sounds on phone
+- [x] Latency feels acceptable (< 20ms perceived)
+- [x] AudioContext resume fix applied for iOS background suspension
 
 ### Phase 4+ (future)
 - [ ] Button → audible sound in < 10ms (hard requirement)

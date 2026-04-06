@@ -56,10 +56,6 @@ Web Audio API resumes + plays drum sound on phone speaker
 
 #### Phase 2 Demo
 
-> 📹 **Video coming** — drag and drop your recording here on GitHub
-
-<!-- PLACEHOLDER: paste your Phase 2 demo video here -->
-
 https://github.com/user-attachments/assets/d413f8be-6853-4fed-81b4-6168fe795195
 
 
@@ -198,9 +194,7 @@ https://github.com/user-attachments/assets/dd6a18f4-1137-4b9d-854d-ca3681d37620
 
 ### Phase 2 — Physical Buttons → WiFi → iPhone
 
-> 📹 Video coming — will be added after recording
-
-<!-- PLACEHOLDER: paste Phase 2 demo video here -->
+https://github.com/user-attachments/assets/d413f8be-6853-4fed-81b4-6168fe795195
 
 ---
 

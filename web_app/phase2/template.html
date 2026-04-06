@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>ESP32 Drum Kit</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    /* ── Start overlay (iOS requires user tap before audio) ── */
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0f0f0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      z-index: 100;
+    }
+
+    #start-overlay h1 { font-size: 1.6rem; color: #fff; }
+    #start-overlay p  { font-size: 0.9rem; color: #666; text-align: center; padding: 0 32px; }
+
+    #btn-start {
+      padding: 18px 48px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    .header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 { font-size: 1rem; font-weight: 600; color: #fff; }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #444;
+      transition: background 0.3s;
+    }
+    .dot.connected { background: #22c55e; }
+
+    /* ── Drum grid ────────────────────────────────────────── */
+    .drum-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 400px;
+      flex: 1;
+      padding: 12px 0;
+    }
+
+    .pad {
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 2px solid transparent;
+      transition: filter 0.08s, transform 0.07s, border-color 0.08s;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 72px;
+    }
+
+    .pad:active, .pad.active {
+      filter: brightness(1.6);
+      border-color: rgba(255,255,255,0.5);
+      transform: scale(0.94);
+    }
+
+    .pad.no-sample { opacity: 0.35; }
+
+    .pad[data-pad="kick"]         { background: #7f1d1d; color: #fecaca; }
+    .pad[data-pad="snare"]        { background: #374151; color: #f3f4f6; }
+    .pad[data-pad="hihat_closed"] { background: #713f12; color: #fef08a; }
+    .pad[data-pad="hihat_open"]   { background: #854d0e; color: #fef08a; }
+    .pad[data-pad="tom_low"]      { background: #1e3a5f; color: #bfdbfe; }
+    .pad[data-pad="tom_mid"]      { background: #1e3a5f; color: #bfdbfe; }
+    .pad[data-pad="crash"]        { background: #4a1d96; color: #ddd6fe; }
+
+    /* ── Log ──────────────────────────────────────────────── */
+    #log {
+      width: 100%;
+      max-width: 400px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: #6ee7b7;
+      height: 64px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- iOS Safari requires a tap before any audio can play -->
+  <div id="start-overlay">
+    <h1>ESP32 Drum Kit</h1>
+    <p>Make sure you're connected to<br><strong>DrumKit-ESP32</strong> WiFi</p>
+    <button id="btn-start">Tap to Start</button>
+  </div>
+
+  <div class="header">
+    <h1>Drum Kit</h1>
+    <div class="status">
+      <div id="status-dot" class="dot"></div>
+      <span id="status-label">Connecting...</span>
+    </div>
+  </div>
+
+  <div class="drum-grid">
+    <div class="pad" id="pad-kick"         data-pad="kick">Kick</div>
+    <div class="pad" id="pad-snare"        data-pad="snare">Snare</div>
+    <div class="pad" id="pad-hihat_closed" data-pad="hihat_closed">HH Closed</div>
+    <div class="pad" id="pad-hihat_open"   data-pad="hihat_open">HH Open</div>
+    <div class="pad" id="pad-tom_low"      data-pad="tom_low">Tom Low</div>
+    <div class="pad" id="pad-tom_mid"      data-pad="tom_mid">Tom Mid</div>
+    <div class="pad" id="pad-crash"        data-pad="crash">Crash</div>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+  // ── Base64 WAV samples (injected by bundle.py) ────────────
+  const SAMPLES_B64 = {
+    kick:         "%%KICK%%",
+    snare:        "%%SNARE%%",
+    hihat_closed: "%%HIHAT_CLOSED%%",
+    hihat_open:   "%%HIHAT_OPEN%%",
+    tom_low:      "%%TOM_LOW%%",
+    tom_mid:      "%%TOM_MID%%",
+    crash:        "%%CRASH%%",
+  };
+
+  const COMMAND_MAP = {
+    KICK:         "kick",
+    SNARE:        "snare",
+    HIHAT_CLOSED: "hihat_closed",
+    HIHAT_OPEN:   "hihat_open",
+    TOM_LOW:      "tom_low",
+    TOM_MID:      "tom_mid",
+    CRASH:        "crash",
+  };
+
+  // ── State ──────────────────────────────────────────────────
+  let audioCtx     = null;
+  let audioBuffers = {};
+  let ws           = null;
+
+  // ── Audio ──────────────────────────────────────────────────
+  function base64_to_array_buffer(b64) {
+    const bin = atob(b64);
+    const buf = new ArrayBuffer(bin.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < bin.length; i++) view[i] = bin.charCodeAt(i);
+    return buf;
+  }
+
+  async function load_samples() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    for (const [id, b64] of Object.entries(SAMPLES_B64)) {
+      try {
+        const arr_buf = base64_to_array_buffer(b64);
+        audioBuffers[id] = await audioCtx.decodeAudioData(arr_buf);
+        log(`✓ loaded ${id}`);
+      } catch (e) {
+        log(`✗ failed ${id}: ${e.message}`);
+        document.getElementById(`pad-${id}`)?.classList.add("no-sample");
+      }
+    }
+  }
+
+  function play(pad_id) {
+    const buf = audioBuffers[pad_id];
+    if (!buf || !audioCtx) return;
+    // iOS suspends AudioContext when page is not being touched —
+    // resume it before every play so WebSocket triggers work
+    const do_play = () => {
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+      flash(pad_id);
+    };
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().then(do_play);
+    } else {
+      do_play();
+    }
+  }
+
+  // ── WebSocket ──────────────────────────────────────────────
+  function connect_ws() {
+    ws = new WebSocket("ws://192.168.4.1:81");
+
+    ws.onopen = () => {
+      set_status(true);
+      log("WebSocket connected");
+    };
+
+    ws.onclose = () => {
+      set_status(false);
+      log("WebSocket disconnected — retrying...");
+      setTimeout(connect_ws, 2000);   // auto-reconnect
+    };
+
+    ws.onerror = () => {
+      log("WebSocket error");
+    };
+
+    ws.onmessage = (e) => {
+      const cmd = e.data.trim();
+      const pad_id = COMMAND_MAP[cmd];
+      if (pad_id) {
+        play(pad_id);
+        log(`▶ ${cmd}`);
+      }
+    };
+  }
+
+  // ── UI ─────────────────────────────────────────────────────
+  function flash(pad_id) {
+    const el = document.getElementById(`pad-${pad_id}`);
+    if (!el) return;
+    el.classList.add("active");
+    setTimeout(() => el.classList.remove("active"), 120);
+  }
+
+  function set_status(connected) {
+    document.getElementById("status-dot").className   = connected ? "dot connected" : "dot";
+    document.getElementById("status-label").textContent = connected ? "Connected" : "Disconnected";
+  }
+
+  function log(msg) {
+    const el = document.getElementById("log");
+    el.textContent += `${msg}\n`;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  // ── Pad tap ────────────────────────────────────────────────
+  document.querySelectorAll(".pad").forEach(el => {
+    el.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      play(el.dataset.pad);
+    }, { passive: false });
+    el.addEventListener("click", () => play(el.dataset.pad));
+  });
+
+  // ── Start button (iOS audio unlock) ───────────────────────
+  document.getElementById("btn-start").addEventListener("click", async () => {
+    document.getElementById("start-overlay").style.display = "none";
+    await load_samples();
+    connect_ws();
+  });
+  </script>
+</body>
+</html>

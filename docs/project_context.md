@@ -1,135 +1,145 @@
 # ESP32 Digital Drum Kit — Project Context
 
 ## What This Project Is
-A progressive drum kit project that starts with zero extra hardware and adds capability phase by phase. The end goal is a standalone physical instrument, but the first deliverable is a fully working browser-based drum machine driven by an ESP32 over USB — no extra components needed.
-
-## The Problem with Starting at the End
-The full system requires: MAX98357A amplifier, SD card module, 8 buttons, speaker, OLED, enclosure.  
-Right now we only have an **ESP32-M1 DevKit and a USB cable**.
-
-Rather than block on hardware procurement, we use the ESP32's USB/Serial connection to a Chrome web app that handles all audio. This is Phase 0.
+A progressive drum kit project that starts with zero extra hardware and adds capability phase by phase. The immediate goal is a **fully wireless drum kit** — press physical buttons, hear sounds on your iPhone, no cables, no laptop, no router. The long-term goal is a fully standalone physical instrument with on-device audio.
 
 ---
 
 ## Phase 0 — UART + Web Browser MVP ✓ COMPLETE
 
 ### Why This Approach
-- **Zero extra hardware** — ESP32 + USB cable is all that's needed
-- **Web Serial API** (Chrome-only) lets the browser open a serial port — no drivers, no Node.js, no Electron
-- **Web Audio API** handles sample playback — low latency, no installs, works offline
-- **Identical command protocol** to what Phase 1 will use — so firmware changes are additive, not rewrites
-- **Standalone test mode** — browser app works without ESP32 connected (click pads with mouse)
+- Zero extra hardware — ESP32 + USB cable only
+- Web Serial API (Chrome-only) opens serial port — no drivers, no installs
+- Web Audio API handles playback — low latency, works offline
+- Proved end-to-end pipeline before adding any hardware
 
 ### Architecture
 ```
-ESP32 Firmware
-  └── Serial.println("KICK")   ← 115200 baud UART over USB
-          |
-     USB cable
-          |
-Chrome Web App (index.html)
-  ├── Web Serial API            ← reads serial port, parses command strings
-  └── Web Audio API             ← decodes WAV buffers, plays on trigger
+ESP32 → Serial.println("KICK") → USB → Chrome Web Serial API → Web Audio API
 ```
 
-### Command Protocol
-Newline-terminated uppercase strings. Simple, human-readable, easy to test in Serial Monitor.
-
-```
-KICK
-SNARE
-HIHAT_CLOSED
-HIHAT_OPEN
-TOM_LOW
-TOM_MID
-CRASH
-RIDE
-```
-
-ESP32 firmware in Phase 0 acts as a "command echo" — you type in Serial Monitor, it echoes the canonical command. In Phase 1, buttons replace typing.
-
-### Files
-```
-firmware/phase0/phase0.ino   ← reads Serial, echoes drum commands
-web_app/phase0/index.html    ← Chrome app, self-contained
-web_app/phase0/app.js        ← Web Serial + Web Audio logic
-web_app/phase0/styles.css    ← drum pad UI
-web_app/phase0/samples/      ← WAV files (22050Hz 16-bit mono)
-```
-
-### Limitations Accepted in Phase 0
-- Audio plays in browser, not from ESP32 — requires laptop to be open during play
-- Latency is browser-dependent (~20–100ms, not the 10ms target) — this is fine for Phase 0
-- No physical buttons — input is Serial Monitor or on-screen click
-- Chrome-only (Web Serial API not in Firefox/Safari)
+### Limitations Accepted
+- Audio on laptop only — laptop must be open
+- Chrome-only (Web Serial not in Safari/Firefox)
+- No physical buttons — Serial Monitor or on-screen click only
 
 ---
 
-## Phase 1 — Physical Buttons (next)
+## Phase 1 — Physical Buttons ✓ COMPLETE
 
-### What Changes
-- Wire 8 tactile buttons to GPIO 4, 5, 12, 13, 14, 15, 18, 19
-- Firmware adds ISR on FALLING edge per button
-- Software debounce: 30ms minimum gap per button
-- Firmware sends the same command strings as Phase 0 — browser app unchanged
-- Latency improves: button → ISR → UART → browser → audio (~30–60ms)
+### What Changed
+- 7 tactile buttons wired to GPIO 4,5,12,13,14,15,18 via breadboard
+- ISR per button (IRAM_ATTR, FALLING edge, 10ms debounce)
+- Same command protocol as Phase 0 — browser app unchanged
+- First time it felt like a real instrument
+
+### What Stayed the Same
+- Chrome web app (zero changes)
+- Command strings (KICK, SNARE, etc.)
+- Audio plays on laptop
+
+---
+
+## Phase 2 — WiFi AP + WebSocket → iPhone Audio 🔄 IN PROGRESS
+
+### The Problem Phase 2 Solves
+Phase 1 still requires a USB cable to a laptop. The user has an iPhone and wants zero cables, zero laptop, zero router. Just press a button and hear sound on the phone.
+
+### Why WiFi Access Point (not WiFi client, not Bluetooth)
+| Option | Latency | Needs router | Extra hardware | Verdict |
+|--------|---------|-------------|---------------|---------|
+| Bluetooth A2DP | 100–300ms | No | No | Too slow for drums |
+| WiFi client mode | 10–20ms | Yes | No | Needs home network |
+| **WiFi AP mode** | **3–8ms** | **No** | **No** | **Chosen** |
+| ESP-NOW | 2–5ms | No | Second ESP32 | Overkill for now |
+
+ESP32 in AP mode = its own hotspot. iPhone connects directly. No infrastructure at all.
+
+### Architecture
+```
+ESP32 boots →
+  ├── WiFi AP: "DrumKit-ESP32" / "drumkit123"
+  ├── HTTP server (port 80) → serves index.html
+  └── WebSocket server (port 81) → pushes drum commands
+
+iPhone →
+  ├── Connects to "DrumKit-ESP32" WiFi
+  ├── Safari → http://192.168.4.1
+  ├── Loads web app (HTML + JS + CSS + base64 WAVs — all one file)
+  ├── WebSocket connects to ws://192.168.4.1:81
+  └── Button press → WebSocket message → Web Audio API → phone speaker
+```
+
+### Key Decisions for Phase 2
+| Decision | Choice | Reason |
+|----------|--------|--------|
+| Wireless protocol | WiFi AP mode | No router, lowest latency, no extra hardware |
+| Command transport | WebSocket | Real-time push, persistent, ~1ms delivery |
+| WAV delivery | Base64 inside HTML | Avoids SPIFFS file serving, one file download |
+| Web app hosting | ESP32 HTTP server | Phone loads directly from ESP32, no laptop |
+| Phone browser | iPhone Safari | Web Audio + WebSocket fully supported |
+| Audio unlock | "Tap to Start" screen | iOS Safari requires user gesture before audio |
+
+### What Changes from Phase 1
+| | Phase 1 | Phase 2 |
+|--|---------|---------|
+| Connection | USB cable | WiFi (no cable) |
+| Web app location | Laptop local server | Served by ESP32 |
+| Transport | UART Serial | WebSocket |
+| Audio output | Laptop speakers | iPhone speaker |
+| Infrastructure | Laptop + Chrome | Just iPhone |
 
 ### What Stays the Same
-- Browser web app (zero changes)
-- Command protocol (zero changes)
-- Serial baud rate (zero changes)
+- Button wiring (identical GPIO pins)
+- ISR + debounce logic (copy from Phase 1)
+- Command strings (KICK, SNARE, etc.)
+- Drum pad UI look and feel
+
+### Libraries Added
+- `links2004/WebSockets` — WebSocket server on ESP32
+
+### Latency Budget
+| Stage | Target |
+|-------|--------|
+| Button → ISR | < 1ms |
+| ISR → WebSocket broadcast | < 2ms |
+| WiFi AP → iPhone | < 8ms |
+| Web Audio playback | < 5ms |
+| **Total** | **< 16ms** |
 
 ---
 
-## Phase 2 — On-Device I2S Audio
+## Phase 3 — Polyphony + FreeRTOS (FUTURE)
 
-### What Changes
-- Add MAX98357A I2S amplifier and SD card module
-- WAV samples stored on SD, streamed and polyphonically mixed on ESP32
-- I2S output replaces browser audio — PC no longer required during play
-- FreeRTOS task split: AudioMixTask on Core 0, InputTask on Core 1
-- Latency target: < 10ms (hard requirement for real performance feel)
-- Browser app becomes a companion tool (visualization, MIDI, kit editor) rather than the primary audio output
+FreeRTOS task split: WiFi/WebSocket on Core 0, button ISR on Core 1. Eliminates scheduling jitter. Web Audio API on iPhone already handles polyphony natively.
 
 ---
 
-## Key Decisions Log
+## Phase 4 — On-Device I2S Audio (FUTURE)
+
+Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. No phone required. Target latency < 10ms.
+
+---
+
+## Key Decisions Log (All Phases)
 
 | Decision | Choice | Reason |
 |----------|--------|--------|
-| Phase 0 audio | Browser (Web Audio API) | No hardware needed |
-| Phase 0 transport | USB Serial / UART | Built into every ESP32 DevKit |
-| Phase 0 interface | Chrome Web Serial API | No drivers, no install, works from a local HTML file |
-| Phase 1+ audio | On-device I2S → MAX98357A | Clean audio, DMA, standalone |
-| Sample format | 22050Hz 16-bit mono WAV | Fits SPIFFS, low decode cost |
-| Input method | ISR FALLING edge | Lowest latency |
-| Debounce | Software 30ms | No extra components |
-| Polyphony (Phase 3) | 32-bit accumulator mix | Prevents clipping on simultaneous hits |
-
----
-
-## Hardware Procurement Plan
-
-| Item | Needed by | Est. Cost | Where to buy |
-|------|-----------|----------|-------------|
-| 8x tactile push buttons | Phase 1 | ~$3 | Amazon, AliExpress |
-| Jumper wires (M-M) | Phase 1 | ~$2 | Amazon |
-| MAX98357A I2S amp module | Phase 2 | ~$3 | Amazon, Adafruit |
-| SD card module (SPI) | Phase 2 | ~$2 | Amazon |
-| MicroSD card 4–8GB | Phase 2 | ~$5 | Amazon |
-| Speaker 3W 8Ω | Phase 2 | ~$4 | Amazon, Adafruit |
-| OLED 0.96" I2C SSD1306 | Phase 4 | ~$4 | Amazon |
-| Project enclosure | Phase 5 | ~$5–15 | Amazon, Hammond |
-
-**Total Phase 1 upgrade cost: ~$5**  
-**Total full build cost: ~$28–40**
+| Phase 0 audio | Browser Web Audio API | No hardware needed |
+| Phase 0 transport | USB Serial / UART | Built into every DevKit |
+| Phase 1 input | ISR FALLING edge | Lowest latency |
+| Phase 1 debounce | Software 10ms | No extra components, tuned on hardware |
+| Phase 2 wireless | WiFi AP mode | No router, no Bluetooth lag, no extra hardware |
+| Phase 2 transport | WebSocket | Real-time push, works on iPhone Safari |
+| Phase 2 WAV delivery | Base64 in HTML | Single file, no SPIFFS complexity |
+| Sample format | 22050Hz 16-bit mono WAV | Compact, low decode cost |
 
 ---
 
 ## Drum Pad Mapping (consistent across all phases)
 
-| Pad | Command | GPIO (Phase 1+) | Color suggestion |
-|-----|---------|-----------------|-----------------|
+| Pad | Command | GPIO | Color |
+|-----|---------|------|-------|
 | Kick | `KICK` | GPIO 4 | Red |
 | Snare | `SNARE` | GPIO 5 | White |
 | Hi-Hat Closed | `HIHAT_CLOSED` | GPIO 12 | Yellow |
@@ -137,7 +147,23 @@ web_app/phase0/samples/      ← WAV files (22050Hz 16-bit mono)
 | Low Tom | `TOM_LOW` | GPIO 14 | Blue |
 | Mid Tom | `TOM_MID` | GPIO 15 | Blue |
 | Crash | `CRASH` | GPIO 18 | Orange |
-| Ride | `RIDE` | GPIO 19 | Orange |
+
+---
+
+## Hardware Procurement Plan
+
+| Item | Needed by | Have it | Est. Cost |
+|------|-----------|---------|----------|
+| 7x tactile push buttons | Phase 1 | ✅ | ~$3 |
+| Jumper wires | Phase 1 | ✅ | ~$2 |
+| Breadboard | Phase 1 | ✅ | — |
+| iPhone | Phase 2 | ✅ | — |
+| MAX98357A I2S amp | Phase 4 | ❌ | ~$3 |
+| SD card module (SPI) | Phase 4 | ❌ | ~$2 |
+| MicroSD card 4–8GB | Phase 4 | ❌ | ~$5 |
+| Speaker 3W 8Ω | Phase 4 | ❌ | ~$4 |
+| OLED 0.96" I2C | Phase 5 | ❌ | ~$4 |
+| Project enclosure | Phase 6 | ❌ | ~$5–15 |
 
 ---
 
@@ -145,24 +171,13 @@ web_app/phase0/samples/      ← WAV files (22050Hz 16-bit mono)
 
 ```
 main
- └── phase-0-mvp          ← current branch
-      └── phase-1-buttons  ← branches when phase-0-mvp merges to main
-           └── phase-2-i2s-audio
-                └── phase-3-polyphony
-                     └── phase-4-display
-                          └── phase-5-enclosure
+ ├── phase-0-mvp       ✅ merged
+ ├── phase-1-buttons   ✅ merged
+ ├── phase-2-wifi-ap   🔄 current
+ ├── phase-3-polyphony
+ ├── phase-4-i2s-audio
+ ├── phase-5-display
+ └── phase-6-enclosure
 ```
 
-Each phase branch is a PR back to `main` when fully tested.  
-Never develop directly on `main`.
-
----
-
-## Audio Sample Sources (Phase 0)
-Get free WAV samples before starting:
-- freesound.org (search "kick drum wav", filter by license)
-- sampleswap.org (free drum kit packs)
-- Convert to 22050Hz 16-bit mono WAV using Audacity
-
-Place files in `web_app/phase0/samples/` with exact filenames:  
-`kick.wav`, `snare.wav`, `hihat_closed.wav`, `hihat_open.wav`, `tom_low.wav`, `tom_mid.wav`, `crash.wav`, `ride.wav`
+Each phase branches from main after previous phase merges. Never develop on main directly.

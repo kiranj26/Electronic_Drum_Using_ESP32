@@ -109,9 +109,24 @@ iPhone →
 
 ---
 
-## Phase 3 — Polyphony + FreeRTOS (FUTURE)
+## Phase 3 — FreeRTOS Dual-Core Task Split ✓ COMPLETE
 
-FreeRTOS task split: WiFi/WebSocket on Core 0, button ISR on Core 1. Eliminates scheduling jitter. Web Audio API on iPhone already handles polyphony natively.
+### The Problem Phase 3 Solves
+Phase 2 ran everything in `loop()` on Core 1. WebSocket polling and HTTP handling competed with button flag checks. Under WiFi load, button presses could lag.
+
+### Fix
+| Core | Task | Responsibility |
+|------|------|---------------|
+| Core 0 | WiFiTask (priority 19) | `ws_server.loop()` + `http_server.handleClient()` |
+| Core 1 | InputTask (priority 20) | Read ISR flags → `ws_server.broadcastTXT()` |
+| Any | ISRs (IRAM_ATTR) | Set `volatile trigger_flags[]` only |
+
+`loop()` sleeps with `vTaskDelay(portMAX_DELAY)`.
+
+### What Stays the Same
+- Same GPIO wiring and ISR debounce logic
+- Same WebSocket protocol and command strings
+- Same web app (copied from Phase 2)
 
 ---
 
@@ -175,7 +190,7 @@ main
  ├── phase-0-mvp       ✅ merged
  ├── phase-1-buttons   ✅ merged
  ├── phase-2-wifi-ap   ✅ merged
- ├── phase-3-polyphony
+ ├── phase-3-polyphony ✅ merged
  ├── phase-4-i2s-audio
  ├── phase-5-display
  └── phase-6-enclosure

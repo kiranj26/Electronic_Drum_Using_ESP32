@@ -3,8 +3,8 @@
 ## TL;DR — What We're Building
 A progressive drum kit project. We start with zero extra hardware (just ESP32 + USB cable + browser) and add capability phase by phase until we have a fully wireless, standalone physical instrument.
 
-**Current phase: Phase 3 — Polyphony + FreeRTOS (next up)**
-**Last completed: Phase 2 — WiFi AP + WebSocket + iPhone Audio**
+**Current phase: Phase 4 — On-Device I2S Audio (next up)**
+**Last completed: Phase 3 — FreeRTOS Dual-Core Task Split**
 
 ---
 
@@ -15,7 +15,7 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 | 0 | UART + Browser MVP | `phase-0-mvp` | ESP32 + USB only | **Complete** |
 | 1 | Physical Buttons → UART → Browser | `phase-1-buttons` | + 7 buttons + breadboard | **Complete** |
 | 2 | WiFi AP + WebSocket → Phone Audio | `phase-2-wifi-ap` | No new hardware | **Complete** |
-| 3 | Polyphony + FreeRTOS | `phase-3-polyphony` | Same as Phase 2 | Not started |
+| 3 | FreeRTOS Dual-Core Task Split | `phase-3-polyphony` | Same as Phase 2 | **Complete** |
 | 4 | On-Device I2S Audio | `phase-4-i2s-audio` | + MAX98357A + SD card + speaker | Not started |
 | 5 | OLED + Kit Switching | `phase-5-display` | + OLED | Not started |
 | 6 | Enclosure + Final Build | `phase-6-enclosure` | Full BOM | Not started |
@@ -178,10 +178,36 @@ web_app/phase2/
 
 ---
 
-## Phase 3 — Polyphony + FreeRTOS (FUTURE)
+## Phase 3 — FreeRTOS Dual-Core Task Split ✅ COMPLETE
 
-Proper FreeRTOS task split — WiFi/WebSocket on Core 0, button input on Core 1.
-4–8 voice polyphony in web app (already supported by Web Audio API).
+### What was built
+- WiFi/WebSocket handling pinned to Core 0 (`WiFiTask`, priority 19, 8KB stack)
+- Button ISR flag processing pinned to Core 1 (`InputTask`, priority 20, 2KB stack)
+- `loop()` sleeps permanently with `vTaskDelay(portMAX_DELAY)` — all work in tasks
+- Result: button input never waits for WiFi processing and vice versa
+
+### Architecture
+```
+Core 0 — WiFiTask:  ws_server.loop() + http_server.handleClient()
+Core 1 — InputTask: reads trigger_flags[], calls ws_server.broadcastTXT()
+ISRs:               IRAM_ATTR, fire on any core, set volatile flags only
+```
+
+### Key config
+| Constant | Value |
+|----------|-------|
+| `WIFI_TASK_CORE` | 0 |
+| `INPUT_TASK_CORE` | 1 |
+| `WIFI_TASK_PRIORITY` | 19 |
+| `INPUT_TASK_PRIORITY` | 20 (higher — never miss a hit) |
+| `WIFI_TASK_STACK` | 8192 bytes |
+| `INPUT_TASK_STACK` | 2048 bytes |
+
+### Testing checklist — COMPLETE ✓
+- [x] Serial Monitor shows "WiFiTask → Core 0" and "InputTask → Core 1" on boot
+- [x] All 7 buttons trigger correctly
+- [x] Sound plays on iPhone with no latency regression
+- [x] System stable after extended use
 
 ---
 

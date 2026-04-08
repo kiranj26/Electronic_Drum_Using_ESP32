@@ -154,10 +154,21 @@ Tap pads on screen → also plays sound.
 
 ---
 
-### Phase 3 — Polyphony + FreeRTOS Optimization
+### Phase 3 — FreeRTOS Dual-Core Task Split ✅ Complete
 **Branch:** `phase-3-polyphony` | **Hardware:** Same as Phase 2
 
-FreeRTOS task split — WiFi/WebSocket on Core 0, button input on Core 1. Eliminates scheduling jitter between input detection and wireless broadcast.
+FreeRTOS task split — WiFi/WebSocket on Core 0, button input on Core 1. Eliminates scheduling jitter between input detection and wireless broadcast. Button presses never wait for WiFi processing.
+
+```
+Core 0 — WiFiTask:  ws_server.loop() + http_server.handleClient()
+Core 1 — InputTask: reads ISR flags → ws_server.broadcastTXT()
+ISRs:               IRAM_ATTR, fire on any core, set volatile flags only
+loop():             vTaskDelay(portMAX_DELAY)  ← permanently idle
+```
+
+#### Phase 3 Demo
+
+<!-- TODO: Add Phase 3 demo video here -->
 
 ---
 
@@ -232,7 +243,8 @@ Electronic_Drum_Using_ESP32/
 ├── firmware/
 │   ├── phase0/                  ← UART command echo sketch
 │   ├── phase1/                  ← Button ISR + UART
-│   └── phase2/                  ← WiFi AP + WebSocket + SPIFFS
+│   ├── phase2/                  ← WiFi AP + WebSocket + SPIFFS
+│   └── phase3/                  ← FreeRTOS dual-core (WiFi=Core0, Input=Core1)
 └── web_app/
     ├── phase0/                  ← Chrome Web Serial + Web Audio app
     └── phase2/                  ← iPhone web app template + bundle script
@@ -247,7 +259,7 @@ Electronic_Drum_Using_ESP32/
 | Phase 0 — UART + Browser MVP | ✅ Complete | `phase-0-mvp` |
 | Phase 1 — Physical Buttons | ✅ Complete | `phase-1-buttons` |
 | Phase 2 — WiFi AP + iPhone Audio | ✅ Complete | `phase-2-wifi-ap` |
-| Phase 3 — Polyphony + RTOS | Not started | `phase-3-polyphony` |
+| Phase 3 — FreeRTOS Dual-Core Split | ✅ Complete | `phase-3-polyphony` |
 | Phase 4 — On-Device I2S Audio | Not started | `phase-4-i2s-audio` |
 | Phase 5 — OLED + Kit Switch | Not started | `phase-5-display` |
 | Phase 6 — Enclosure | Not started | `phase-6-enclosure` |

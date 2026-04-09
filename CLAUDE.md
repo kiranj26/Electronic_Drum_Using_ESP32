@@ -3,7 +3,7 @@
 ## TL;DR — What We're Building
 A progressive drum kit project. We start with zero extra hardware (just ESP32 + USB cable + browser) and add capability phase by phase until we have a fully wireless, standalone physical instrument.
 
-**Current phase: Phase 4 — On-Device I2S Audio (next up)**
+**Current phase: Phase 4a — SD Card WAV Loading (next up)**
 **Last completed: Phase 3 — FreeRTOS Dual-Core Task Split**
 
 ---
@@ -16,7 +16,8 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 | 1 | Physical Buttons → UART → Browser | `phase-1-buttons` | + 7 buttons + breadboard | **Complete** |
 | 2 | WiFi AP + WebSocket → Phone Audio | `phase-2-wifi-ap` | No new hardware | **Complete** |
 | 3 | FreeRTOS Dual-Core Task Split | `phase-3-polyphony` | Same as Phase 2 | **Complete** |
-| 4 | On-Device I2S Audio | `phase-4-i2s-audio` | + MAX98357A + SD card + speaker | Not started |
+| 4a | SD Card WAV Loading | `phase-4a-sd-card` | + Adafruit SD card module + microSD | Not started |
+| 4b | I2S Amp + Speaker Audio | `phase-4b-i2s-audio` | + MAX98357A amp + speaker | Not started |
 | 5 | OLED + Kit Switching | `phase-5-display` | + OLED | Not started |
 | 6 | Enclosure + Final Build | `phase-6-enclosure` | Full BOM | Not started |
 
@@ -211,16 +212,98 @@ ISRs:               IRAM_ATTR, fire on any core, set volatile flags only
 
 ---
 
-## Phase 4 — On-Device I2S Audio (FUTURE)
+## Phase 4a — SD Card WAV Loading (NEXT UP)
 
-### What changes from Phase 2
-- Add MAX98357A I2S amplifier (GPIO 25/26/22)
-- Add SD card SPI module (GPIO 23/21/20/16)
-- WAV files on SD card, streamed and mixed on ESP32
-- Phone/web app becomes optional — ESP32 plays audio standalone
-- I2S: I2S_NUM_0, Master TX, 22050Hz, 16-bit, DMA 8×512
+### Goal
+Load WAV files from an Adafruit microSD card module over SPI. Verify that all 8 drum WAV files can be read and decoded into memory at boot. No audio output yet — this phase is purely about proving SD + WAV loading works reliably before wiring audio hardware.
 
-### Voice struct (do not change shape without updating mixer)
+### Hardware needed
+- Adafruit MicroSD Card Breakout Board (already owned ✅)
+- MicroSD card formatted FAT32 with 8 WAV files
+
+### GPIO assignments (SPI bus)
+
+> **Conflict note:** GPIO 18 (currently CRASH button) and GPIO 5 (currently SNARE) conflict with default SPI. Remap those buttons to GPIO 32 and GPIO 33.
+
+| Signal | GPIO | Notes |
+|--------|------|-------|
+| SPI SCK | 18 | **Remap CRASH from 18 → 32** |
+| SPI MOSI | 23 | Free |
+| SPI MISO | 19 | Free |
+| SD CS | 5 | **Remap SNARE from 5 → 33** |
+
+### Updated button GPIO map (Phase 4a+)
+| GPIO | Drum |
+|------|------|
+| 4 | `KICK` |
+| 33 | `SNARE` ← remapped from 5 |
+| 12 | `HIHAT_CLOSED` |
+| 13 | `HIHAT_OPEN` |
+| 14 | `TOM_LOW` |
+| 15 | `TOM_MID` |
+| 32 | `CRASH` ← remapped from 18 |
+
+### SD card file layout
+```
+/kick.wav
+/snare.wav
+/hihat_closed.wav
+/hihat_open.wav
+/tom_low.wav
+/tom_mid.wav
+/crash.wav
+/ride.wav
+```
+
+### WAV format requirement
+- 22050 Hz, 16-bit, mono, PCM (uncompressed)
+- Max ~200KB per file to fit in PSRAM or DRAM pre-load
+
+### Library
+| Library | Purpose | PlatformIO dep |
+|---------|---------|---------------|
+| `SD.h` | SPI SD card | Built-in Arduino core |
+| `FS.h` | File system abstraction | Built-in ESP32 Arduino core |
+
+### What Phase 4a proves
+- SD card mounts correctly
+- All 8 WAV files open and read without errors
+- WAV headers parse (sample rate, bit depth, data offset)
+- Files loadable into heap buffers at boot
+- Button remapping (GPIO 32/33) still triggers correctly
+
+### Testing checklist
+- [ ] SD card mounts on boot — Serial shows "SD mounted OK"
+- [ ] All 8 WAV files confirmed present and readable
+- [ ] WAV header parsed: 22050Hz, 16-bit, mono
+- [ ] Files pre-loaded into buffers at boot
+- [ ] CRASH and SNARE still fire on GPIO 32/33
+- [ ] No crash or lockup after 5-minute idle
+
+---
+
+## Phase 4b — I2S Amp + Speaker Audio (FUTURE)
+
+### Goal
+Route pre-loaded WAV buffers from Phase 4a through an I2S amplifier (MAX98357A) to a physical speaker. Full standalone audio — no phone, no laptop needed.
+
+### Hardware needed
+- MAX98357A I2S amplifier breakout (to purchase ❌)
+- 4Ω or 8Ω speaker, 2–3W (to purchase ❌)
+
+### GPIO assignments (I2S)
+| Signal | GPIO | Notes |
+|--------|------|-------|
+| I2S BCLK | 26 | Bit clock |
+| I2S LRC (WS) | 25 | Word select |
+| I2S DOUT | 22 | Data to MAX98357A DIN |
+
+### Architecture
+```
+Button press → ISR flag → InputTask → read WAV buffer → I2S DMA write → MAX98357A → speaker
+```
+
+### Voice struct (mixer — do not change shape without updating mixer)
 ```cpp
 struct Voice {
   int16_t* buffer;
@@ -230,6 +313,23 @@ struct Voice {
   bool     active;
 };
 ```
+
+### Key parameters
+| Parameter | Value |
+|-----------|-------|
+| I2S port | I2S_NUM_0 |
+| Mode | Master TX |
+| Sample rate | 22050 Hz |
+| Bit depth | 16-bit |
+| DMA buffers | 8 × 512 samples |
+| Max voices | 4 simultaneous |
+
+### Testing checklist
+- [ ] Button press → audible drum sound from speaker
+- [ ] Latency < 10ms press-to-sound
+- [ ] 4 simultaneous buttons all produce sound (polyphony)
+- [ ] No clipping, pops, or crackling
+- [ ] System stable after 30-min continuous play
 
 ---
 

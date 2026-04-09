@@ -172,13 +172,26 @@ loop():             vTaskDelay(portMAX_DELAY)  ← permanently idle
 
 ---
 
-### Phase 4 — On-Device I2S Audio
-**Branch:** `phase-4-i2s-audio` | **Hardware:** + MAX98357A amp + SD card + 3W speaker
+### Phase 4a — SD Card WAV Loading
+**Branch:** `phase-4a-sd-card` | **Hardware:** + Adafruit microSD card module ✅ (owned)
 
-Move audio playback onto the ESP32 itself. WAV samples on SD card, polyphonically mixed, output through I2S amplifier to a physical speaker. Phone becomes optional.
+Load WAV drum samples from a microSD card over SPI. Prove that all 8 WAV files read reliably at boot and parse correctly. No audio output in this phase — just the data pipeline.
 
 ```
-Button press → ESP32 → I2S → MAX98357A → speaker  (no phone, no laptop)
+Boot → SPI → SD card → read WAV files → decode → heap buffers → ready
+```
+
+Also remaps CRASH (GPIO 18→32) and SNARE (GPIO 5→33) to free up the SPI pins.
+
+---
+
+### Phase 4b — I2S Amp + Speaker Audio
+**Branch:** `phase-4b-i2s-audio` | **Hardware:** + MAX98357A amp + 3W speaker (to purchase)
+
+Route the WAV buffers loaded in Phase 4a through an I2S amplifier to a real speaker. Fully standalone — no phone, no laptop.
+
+```
+Button press → ESP32 → I2S DMA → MAX98357A → speaker  (no phone, no laptop)
 ```
 
 ---
@@ -219,10 +232,10 @@ https://github.com/user-attachments/assets/d413f8be-6853-4fed-81b4-6168fe795195
 | Jumper wires | Phase 1 | ✅ | ~$2 |
 | Breadboard | Phase 1 | ✅ | — |
 | iPhone (any) | Phase 2 | ✅ | — |
-| MAX98357A I2S amp module | Phase 4 | ❌ | ~$3 |
-| SD card module (SPI) | Phase 4 | ❌ | ~$2 |
-| MicroSD card 4–8GB | Phase 4 | ❌ | ~$5 |
-| Speaker 3W 8Ω | Phase 4 | ❌ | ~$4 |
+| Adafruit microSD card breakout | Phase 4a | ✅ | ~$8 |
+| MicroSD card 4–8GB | Phase 4a | ✅ | ~$5 |
+| MAX98357A I2S amp module | Phase 4b | ❌ | ~$3 |
+| Speaker 3W 8Ω | Phase 4b | ❌ | ~$4 |
 | OLED 0.96" I2C | Phase 5 | ❌ | ~$4 |
 | Project enclosure | Phase 6 | ❌ | ~$5–15 |
 | **Phase 2 total** | | | **$0** |
@@ -260,6 +273,7 @@ Electronic_Drum_Using_ESP32/
 | Phase 1 — Physical Buttons | ✅ Complete | `phase-1-buttons` |
 | Phase 2 — WiFi AP + iPhone Audio | ✅ Complete | `phase-2-wifi-ap` |
 | Phase 3 — FreeRTOS Dual-Core Split | ✅ Complete | `phase-3-polyphony` |
-| Phase 4 — On-Device I2S Audio | Not started | `phase-4-i2s-audio` |
+| Phase 4a — SD Card WAV Loading | Not started | `phase-4a-sd-card` |
+| Phase 4b — I2S Amp + Speaker Audio | Not started | `phase-4b-i2s-audio` |
 | Phase 5 — OLED + Kit Switch | Not started | `phase-5-display` |
 | Phase 6 — Enclosure | Not started | `phase-6-enclosure` |

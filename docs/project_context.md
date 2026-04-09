@@ -130,9 +130,60 @@ Phase 2 ran everything in `loop()` on Core 1. WebSocket polling and HTTP handlin
 
 ---
 
-## Phase 4 — On-Device I2S Audio (FUTURE)
+## Phase 4a — SD Card WAV Loading (NEXT UP)
 
-Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. No phone required. Target latency < 10ms.
+### Goal
+Prove that 8 WAV drum samples can be loaded from a microSD card over SPI at boot. No audio output yet — purely validates the data pipeline.
+
+### Hardware
+- Adafruit MicroSD Card Breakout Board ✅ (owned)
+- MicroSD card FAT32-formatted ✅ (owned)
+
+### GPIO conflict resolution
+GPIO 18 (SPI SCK) and GPIO 5 (SD CS) conflict with existing button assignments. Solution: remap CRASH → GPIO 32, SNARE → GPIO 33.
+
+| Button | Phase 1–3 GPIO | Phase 4a+ GPIO |
+|--------|---------------|----------------|
+| SNARE | 5 | 33 |
+| CRASH | 18 | 32 |
+
+### SPI pin assignments
+| Signal | GPIO |
+|--------|------|
+| SCK | 18 |
+| MOSI | 23 |
+| MISO | 19 |
+| CS | 5 |
+
+### SD file layout
+```
+/kick.wav  /snare.wav  /hihat_closed.wav  /hihat_open.wav
+/tom_low.wav  /tom_mid.wav  /crash.wav  /ride.wav
+```
+All files: 22050Hz, 16-bit, mono PCM, max ~200KB each.
+
+---
+
+## Phase 4b — I2S Amp + Speaker Audio (FUTURE)
+
+### Goal
+Route Phase 4a's WAV buffers through a MAX98357A I2S amplifier to a physical speaker. Fully standalone — no phone, no laptop.
+
+### Hardware
+- MAX98357A I2S amp breakout ❌ (to purchase, ~$3)
+- 4Ω or 8Ω speaker, 2–3W ❌ (to purchase, ~$4)
+
+### I2S pin assignments
+| Signal | GPIO |
+|--------|------|
+| BCLK | 26 |
+| LRC (WS) | 25 |
+| DOUT | 22 |
+
+### Target
+- Button press → audible sound < 10ms
+- 4-voice polyphony (simultaneous hits)
+- No pops, no crackling, stable after 30min play
 
 ---
 
@@ -174,10 +225,10 @@ Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. N
 | Jumper wires | Phase 1 | ✅ | ~$2 |
 | Breadboard | Phase 1 | ✅ | — |
 | iPhone | Phase 2 | ✅ | — |
-| MAX98357A I2S amp | Phase 4 | ❌ | ~$3 |
-| SD card module (SPI) | Phase 4 | ❌ | ~$2 |
-| MicroSD card 4–8GB | Phase 4 | ❌ | ~$5 |
-| Speaker 3W 8Ω | Phase 4 | ❌ | ~$4 |
+| Adafruit microSD card breakout | Phase 4a | ✅ | ~$8 |
+| MicroSD card 4–8GB | Phase 4a | ✅ | ~$5 |
+| MAX98357A I2S amp | Phase 4b | ❌ | ~$3 |
+| Speaker 3W 8Ω | Phase 4b | ❌ | ~$4 |
 | OLED 0.96" I2C | Phase 5 | ❌ | ~$4 |
 | Project enclosure | Phase 6 | ❌ | ~$5–15 |
 
@@ -191,7 +242,8 @@ main
  ├── phase-1-buttons   ✅ merged
  ├── phase-2-wifi-ap   ✅ merged
  ├── phase-3-polyphony ✅ merged
- ├── phase-4-i2s-audio
+ ├── phase-4a-sd-card
+ ├── phase-4b-i2s-audio
  ├── phase-5-display
  └── phase-6-enclosure
 ```

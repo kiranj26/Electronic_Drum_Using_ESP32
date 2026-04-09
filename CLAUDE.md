@@ -3,8 +3,8 @@
 ## TL;DR — What We're Building
 A progressive drum kit project. We start with zero extra hardware (just ESP32 + USB cable + browser) and add capability phase by phase until we have a fully wireless, standalone physical instrument.
 
-**Current phase: Phase 4 — On-Device I2S Audio (next up)**
-**Last completed: Phase 3 — FreeRTOS Dual-Core Task Split**
+**Current phase: Phase 4b — I2S Amp + Speaker Audio (next up)**
+**Last completed: Phase 4a — SD Card WAV Loading**
 
 ---
 
@@ -16,7 +16,8 @@ A progressive drum kit project. We start with zero extra hardware (just ESP32 + 
 | 1 | Physical Buttons → UART → Browser | `phase-1-buttons` | + 7 buttons + breadboard | **Complete** |
 | 2 | WiFi AP + WebSocket → Phone Audio | `phase-2-wifi-ap` | No new hardware | **Complete** |
 | 3 | FreeRTOS Dual-Core Task Split | `phase-3-polyphony` | Same as Phase 2 | **Complete** |
-| 4 | On-Device I2S Audio | `phase-4-i2s-audio` | + MAX98357A + SD card + speaker | Not started |
+| 4a | SD Card WAV Loading | `phase-4a-sd-card` | + Adafruit SD card module + microSD | **Complete** |
+| 4b | I2S Amp + Speaker Audio | `phase-4b-i2s-audio` | + MAX98357A amp + speaker | Not started |
 | 5 | OLED + Kit Switching | `phase-5-display` | + OLED | Not started |
 | 6 | Enclosure + Final Build | `phase-6-enclosure` | Full BOM | Not started |
 
@@ -211,25 +212,22 @@ ISRs:               IRAM_ATTR, fire on any core, set volatile flags only
 
 ---
 
-## Phase 4 — On-Device I2S Audio (FUTURE)
+## Phase 4a — SD Card WAV Loading ✅ COMPLETE
 
-### What changes from Phase 2
-- Add MAX98357A I2S amplifier (GPIO 25/26/22)
-- Add SD card SPI module (GPIO 23/21/20/16)
-- WAV files on SD card, streamed and mixed on ESP32
-- Phone/web app becomes optional — ESP32 plays audio standalone
-- I2S: I2S_NUM_0, Master TX, 22050Hz, 16-bit, DMA 8×512
+### What was built
+- Adafruit MicroSD breakout mounted over SPI at boot
+- All 8 WAV files opened, header validated (22050Hz 16-bit mono PCM), PCM data loaded into heap buffers
+- SNARE remapped GPIO 5 → 33, CRASH remapped GPIO 18 → 32 to free SPI pins
+- InputTask on Core 1 confirms all 7 buttons via Serial Monitor
+- No audio output — purely validates SD + WAV data pipeline
 
-### Voice struct (do not change shape without updating mixer)
-```cpp
-struct Voice {
-  int16_t* buffer;
-  uint32_t position;
-  uint32_t length;
-  float    volume;
-  bool     active;
-};
-```
+### Test results — COMPLETE ✓
+- [x] SD card mounts on boot — "SD mounted OK — card size: 30436MB"
+- [x] All 8 WAV files confirmed present and readable
+- [x] WAV header parsed: 22050Hz, 16-bit, mono for all 8 files
+- [x] Files pre-loaded into heap buffers at boot
+- [x] CRASH fires on GPIO 32, SNARE fires on GPIO 33
+- [x] Free heap after load: 282748 bytes — sufficient for Phase 4b
 
 ---
 
@@ -254,7 +252,7 @@ struct Voice {
 - `main` — stable, tagged releases only
 - Each phase has its own branch, branched from main after previous phase merges
 - PRs go: `phase-N` → `main` when phase is fully working and tested
-- Next branch: `phase-3-polyphony` (branches from main)
+- Next branch: `phase-4b-i2s-audio` (branches from main after 4a merges)
 
 ## Audio Sample Spec
 - Format: WAV, PCM, uncompressed
@@ -288,7 +286,13 @@ struct Voice {
 - [x] Latency feels acceptable (< 20ms perceived)
 - [x] AudioContext resume fix applied for iOS background suspension
 
-### Phase 4+ (future)
+### Phase 4a — COMPLETE ✓
+- [x] SD card mounts on boot
+- [x] All 8 WAV files load at 22050Hz 16-bit mono
+- [x] All 7 buttons fire including remapped GPIO 32/33
+- [x] Free heap sufficient for Phase 4b audio buffers
+
+### Phase 4b (future)
 - [ ] Button → audible sound in < 10ms (hard requirement)
 - [ ] 4 simultaneous buttons all produce sound
 - [ ] No clipping, pops, or crackling

@@ -130,9 +130,22 @@ Phase 2 ran everything in `loop()` on Core 1. WebSocket polling and HTTP handlin
 
 ---
 
-## Phase 4 — On-Device I2S Audio (FUTURE)
+## Phase 4a — SD Card WAV Loading ✓ COMPLETE
 
-Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. No phone required. Target latency < 10ms.
+### What Phase 4a proved
+- Adafruit MicroSD breakout mounts cleanly over SPI (CS=GPIO5, SCK=GPIO18, MOSI=GPIO23, MISO=GPIO19)
+- All 8 WAV files load at boot: 22050Hz 16-bit mono PCM validated per file
+- 282KB free heap after loading all 8 buffers — plenty of room for I2S in Phase 4b
+- GPIO remap worked: SNARE→32, CRASH→33, all 7 buttons confirmed
+
+### Key fix during phase
+- 7 of 8 WAV files were 44100Hz (wrong format) — converted to 22050Hz using macOS `afconvert`
+
+---
+
+## Phase 4b — I2S Amp + Speaker Audio (NEXT UP)
+
+Route Phase 4a WAV buffers through MAX98357A I2S amp to a physical speaker. Fully standalone — no phone required. Target latency < 10ms.
 
 ---
 
@@ -174,10 +187,10 @@ Move audio playback to ESP32 itself — MAX98357A I2S amp + SD card + speaker. N
 | Jumper wires | Phase 1 | ✅ | ~$2 |
 | Breadboard | Phase 1 | ✅ | — |
 | iPhone | Phase 2 | ✅ | — |
-| MAX98357A I2S amp | Phase 4 | ❌ | ~$3 |
-| SD card module (SPI) | Phase 4 | ❌ | ~$2 |
-| MicroSD card 4–8GB | Phase 4 | ❌ | ~$5 |
-| Speaker 3W 8Ω | Phase 4 | ❌ | ~$4 |
+| Adafruit microSD card breakout | Phase 4a | ✅ | ~$8 |
+| MicroSD card (any size) | Phase 4a | ✅ | — |
+| MAX98357A I2S amp | Phase 4b | ❌ | ~$3 |
+| Speaker 3W 8Ω | Phase 4b | ❌ | ~$4 |
 | OLED 0.96" I2C | Phase 5 | ❌ | ~$4 |
 | Project enclosure | Phase 6 | ❌ | ~$5–15 |
 

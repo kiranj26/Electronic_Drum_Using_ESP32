@@ -195,6 +195,9 @@ Route WAV buffers loaded in Phase 4a through an I2S amplifier to a real speaker.
 ```
 Button press → ESP32 → I2S DMA → MAX98357A → speaker  (no phone, no laptop)
 ```
+#### Phase 4b Demo
+
+https://github.com/user-attachments/assets/b0563da3-9379-4325-9881-f0377f5ed5b3
 
 ---
 

@@ -65,7 +65,7 @@ static portMUX_TYPE voice_mux = portMUX_INITIALIZER_UNLOCKED;
 #define BTN_TOM_MID      15
 #define BTN_CRASH        32
 
-#define DEBOUNCE_MS   10
+#define DEBOUNCE_MS   50
 #define NUM_BUTTONS    7
 
 // ── FreeRTOS task config ──────────────────────────────────────
@@ -107,7 +107,7 @@ static const Button BUTTONS[NUM_BUTTONS] = {
   { BTN_KICK,          0 },  // kick.wav
   { BTN_SNARE,         1 },  // snare.wav
   { BTN_HIHAT_CLOSED,  2 },  // hihat_closed.wav
-  { BTN_HIHAT_OPEN,    3 },  // hihat_open.wav
+  { BTN_HIHAT_OPEN,    2 },  // hihat_closed.wav  (same sample, no open hihat)
   { BTN_TOM_LOW,       4 },  // tom_low.wav
   { BTN_TOM_MID,       5 },  // tom_mid.wav
   { BTN_CRASH,         6 },  // crash.wav
@@ -139,16 +139,17 @@ static void (*ISR_HANDLERS[NUM_BUTTONS])() = {
 // Called from InputTask when a button fires.
 // Finds a free voice slot — if all full, steals slot 0 (oldest).
 void trigger_voice(uint8_t sample_idx) {
-  if (!SAMPLES[sample_idx].loaded) return;
+  if (!SAMPLES[sample_idx].loaded) {
+    Serial.printf("  WARN: sample %u not loaded — skipping\n", sample_idx);
+    return;
+  }
 
   portENTER_CRITICAL(&voice_mux);
 
-  // Find a free slot
   int8_t slot = -1;
   for (uint8_t i = 0; i < MAX_VOICES; i++) {
     if (!voices[i].active) { slot = i; break; }
   }
-  // All slots busy — steal slot 0
   if (slot < 0) slot = 0;
 
   voices[slot].buffer   = SAMPLES[sample_idx].buffer;
@@ -157,6 +158,10 @@ void trigger_voice(uint8_t sample_idx) {
   voices[slot].active   = true;
 
   portEXIT_CRITICAL(&voice_mux);
+
+  Serial.printf("  voice slot %d: %s  len=%lu\n",
+                slot, SAMPLES[sample_idx].filename,
+                SAMPLES[sample_idx].num_samples);
 }
 
 // ── WAV header parser ─────────────────────────────────────────
@@ -184,33 +189,98 @@ WavHeader parse_wav_header(File& f) {
   return hdr;
 }
 
-bool load_wav(WavSample& s) {
+// ── Pass 1: read header only, record required buffer size ─────
+// Returns data_size needed, or 0 on error. Does NOT malloc.
+uint32_t probe_wav(WavSample& s) {
   File f = SD.open(s.filename);
   if (!f) {
-    Serial.printf("  ERROR: cannot open %s\n", s.filename);
-    return false;
+    Serial.printf("  PROBE ERROR: cannot open %s\n", s.filename);
+    return 0;
   }
   WavHeader hdr = parse_wav_header(f);
-  if (!hdr.valid || hdr.audio_format != 1 ||
-      hdr.num_channels != 1 || hdr.sample_rate != 22050 ||
-      hdr.bits_per_sample != 16) {
-    Serial.printf("  ERROR: %s — bad format\n", s.filename);
-    f.close();
-    return false;
-  }
-  s.buffer = (int16_t*)malloc(hdr.data_size);
-  if (!s.buffer) {
-    Serial.printf("  ERROR: %s — malloc failed\n", s.filename);
-    f.close();
-    return false;
-  }
-  f.read((uint8_t*)s.buffer, hdr.data_size);
   f.close();
+
+  if (!hdr.valid) {
+    Serial.printf("  PROBE ERROR: %s — invalid WAV header\n", s.filename);
+    return 0;
+  }
+  Serial.printf("  PROBE: %-30s  fmt=%u ch=%u rate=%lu bits=%u  data=%lu bytes\n",
+                s.filename, hdr.audio_format, hdr.num_channels,
+                hdr.sample_rate, hdr.bits_per_sample, hdr.data_size);
+
+  if (hdr.audio_format != 1 || hdr.num_channels != 1 ||
+      hdr.sample_rate != 22050 || hdr.bits_per_sample != 16) {
+    Serial.printf("  PROBE ERROR: %s — bad format (need PCM mono 22050Hz 16-bit)\n",
+                  s.filename);
+    return 0;
+  }
+  return hdr.data_size;
+}
+
+// ── Pass 2: read PCM data into pre-allocated buffer ───────────
+bool read_wav_data(WavSample& s) {
+  File f = SD.open(s.filename);
+  if (!f) {
+    Serial.printf("  READ ERROR: cannot open %s\n", s.filename);
+    return false;
+  }
+  WavHeader hdr = parse_wav_header(f);  // re-read header to seek past it
+  size_t bytes_read = f.read((uint8_t*)s.buffer, hdr.data_size);
+  f.close();
+
+  if (bytes_read != hdr.data_size) {
+    Serial.printf("  READ ERROR: %s — short read (%u of %lu bytes)\n",
+                  s.filename, bytes_read, hdr.data_size);
+    return false;
+  }
   s.num_samples = hdr.data_size / 2;
   s.loaded      = true;
-  Serial.printf("  OK  : %-22s  %lu samples  (%lu KB)\n",
+  Serial.printf("  READ OK : %-30s  %lu samples  (%lu KB)\n",
                 s.filename, s.num_samples, hdr.data_size / 1024);
   return true;
+}
+
+// ── Two-pass WAV loader ───────────────────────────────────────
+// Pass 1: probe all headers → malloc all buffers while heap is clean
+// Pass 2: read PCM data into pre-allocated buffers
+void load_all_wavs() {
+  Serial.println("# Pass 1: probing WAV headers...");
+  uint32_t sizes[NUM_SAMPLES] = { 0 };
+  uint32_t total_needed = 0;
+
+  for (uint8_t i = 0; i < NUM_SAMPLES; i++) {
+    sizes[i] = probe_wav(SAMPLES[i]);
+    total_needed += sizes[i];
+  }
+  Serial.printf("# Total PCM bytes needed: %lu  |  Heap free: %lu  |  Max block: %lu\n",
+                total_needed, ESP.getFreeHeap(), ESP.getMaxAllocHeap());
+  Serial.println();
+
+  Serial.println("# Pass 2: allocating buffers while heap is clean...");
+  uint8_t alloc_ok = 0;
+  for (uint8_t i = 0; i < NUM_SAMPLES; i++) {
+    if (sizes[i] == 0) continue;
+    SAMPLES[i].buffer = (int16_t*)malloc(sizes[i]);
+    if (SAMPLES[i].buffer) {
+      alloc_ok++;
+      Serial.printf("  ALLOC OK : %-30s  %lu KB  (heap left: %lu)\n",
+                    SAMPLES[i].filename, sizes[i] / 1024, ESP.getFreeHeap());
+    } else {
+      Serial.printf("  ALLOC FAIL: %-30s  need %lu KB  max_block: %lu KB\n",
+                    SAMPLES[i].filename, sizes[i] / 1024, ESP.getMaxAllocHeap() / 1024);
+    }
+  }
+  Serial.printf("# Buffers allocated: %u / %u\n", alloc_ok, NUM_SAMPLES);
+  Serial.println();
+
+  Serial.println("# Pass 3: reading PCM data from SD...");
+  uint8_t loaded = 0;
+  for (uint8_t i = 0; i < NUM_SAMPLES; i++) {
+    if (!SAMPLES[i].buffer) continue;
+    if (read_wav_data(SAMPLES[i])) loaded++;
+  }
+  Serial.printf("# WAV load result: %u / %u\n", loaded, NUM_SAMPLES);
+  Serial.printf("# Free heap after load: %lu bytes\n", ESP.getFreeHeap());
 }
 
 // ── I2S init ──────────────────────────────────────────────────
@@ -219,7 +289,7 @@ void init_i2s() {
     .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
     .sample_rate          = I2S_SAMPLE_RATE,
     .bits_per_sample      = I2S_BITS_PER_SAMPLE_16BIT,
-    .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,
+    .channel_format       = I2S_CHANNEL_FMT_ONLY_RIGHT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
     .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,
     .dma_buf_count        = I2S_DMA_BUF_COUNT,
@@ -247,21 +317,16 @@ void init_i2s() {
 void audio_task(void* pv) {
   Serial.println("# AudioTask → Core 0");
 
-  // Stereo buffer: I2S sends L+R pairs even in mono mode.
-  // We duplicate each mono sample to both channels.
-  static int32_t mix_buf[I2S_DMA_BUF_LEN];       // mix in 32-bit to avoid overflow
-  static int16_t out_buf[I2S_DMA_BUF_LEN * 2];   // L+R interleaved for I2S
+  static int32_t mix_buf[I2S_DMA_BUF_LEN];  // mix in 32-bit to avoid overflow
+  static int16_t out_buf[I2S_DMA_BUF_LEN];  // mono output
 
   while (true) {
-    // Zero the mix buffer
     memset(mix_buf, 0, sizeof(mix_buf));
 
     portENTER_CRITICAL(&voice_mux);
 
-    // Mix all active voices
     for (uint8_t v = 0; v < MAX_VOICES; v++) {
       if (!voices[v].active) continue;
-
       for (uint16_t s = 0; s < I2S_DMA_BUF_LEN; s++) {
         if (voices[v].position < voices[v].length) {
           mix_buf[s] += voices[v].buffer[voices[v].position++];
@@ -274,16 +339,17 @@ void audio_task(void* pv) {
 
     portEXIT_CRITICAL(&voice_mux);
 
-    // Clip to int16 range and interleave L+R
+    // Attenuate to 50% before sending to amp.
+    // GAIN pin is tied to GND = +15dB hardware gain on MAX98357A.
+    // Drum samples peak near full scale, so we back off here to avoid
+    // mechanically overdriving the speaker. Raise toward 1.0 if too quiet.
     for (uint16_t s = 0; s < I2S_DMA_BUF_LEN; s++) {
-      int32_t sample = mix_buf[s];
+      int32_t sample = mix_buf[s] >> 1;  // 0.5x = -6dB
       if (sample >  32767) sample =  32767;
       if (sample < -32768) sample = -32768;
-      out_buf[s * 2]     = (int16_t)sample;  // Left channel
-      out_buf[s * 2 + 1] = (int16_t)sample;  // Right channel (same — mono)
+      out_buf[s] = (int16_t)sample;
     }
 
-    // Write to I2S — blocks until DMA buffer accepts data
     size_t bytes_written = 0;
     i2s_write(I2S_PORT, out_buf, sizeof(out_buf), &bytes_written, portMAX_DELAY);
   }
@@ -313,6 +379,11 @@ void setup() {
   Serial.println("# Standalone audio: SD card + I2S + MAX98357A + speaker");
   Serial.println();
 
+  // Heap baseline
+  Serial.printf("# Heap at boot: free=%lu bytes  max_block=%lu bytes  total=%lu bytes\n",
+                ESP.getFreeHeap(), ESP.getMaxAllocHeap(), ESP.getHeapSize());
+  Serial.println();
+
   // Mount SD card
   Serial.println("# Mounting SD card...");
   if (!SD.begin(SD_CS_PIN)) {
@@ -323,14 +394,8 @@ void setup() {
                 SD.cardSize() / (1024 * 1024));
   Serial.println();
 
-  // Load WAV files
-  Serial.println("# Loading WAV files...");
-  uint8_t loaded = 0;
-  for (uint8_t i = 0; i < NUM_SAMPLES; i++) {
-    if (load_wav(SAMPLES[i])) loaded++;
-  }
-  Serial.printf("# WAV load result: %u / %u\n", loaded, NUM_SAMPLES);
-  Serial.printf("# Free heap: %lu bytes\n", ESP.getFreeHeap());
+  // Load WAV files (two-pass: probe headers → alloc → read data)
+  load_all_wavs();
   Serial.println();
 
   // Init I2S

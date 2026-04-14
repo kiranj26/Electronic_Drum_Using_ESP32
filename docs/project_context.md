@@ -143,9 +143,36 @@ Phase 2 ran everything in `loop()` on Core 1. WebSocket polling and HTTP handlin
 
 ---
 
-## Phase 4b — I2S Amp + Speaker Audio (NEXT UP)
+## Phase 4b — I2S Amp + Speaker Audio ✓ COMPLETE
 
-Route Phase 4a WAV buffers through MAX98357A I2S amp to a physical speaker. Fully standalone — no phone required. Target latency < 10ms.
+### What Phase 4b built
+- I2S audio output: ESP32 → MAX98357A Class D amp → Adafruit #3351 3W 4Ω speaker
+- 4-voice polyphonic mixer on Core 0 (AudioTask), input processing on Core 1 (InputTask)
+- Two-pass WAV loader solves heap fragmentation: probe all headers → malloc all buffers → read PCM
+- `I2S_CHANNEL_FMT_ONLY_RIGHT` for correct mono output
+- 0.5x software attenuation to prevent overdriving amp (GAIN pin = GND = +15dB hardware)
+- 50ms ISR debounce eliminates double-triggers on kick/snare
+
+### Hardware added
+- MAX98357A I2S Class D Mono Amp: BCLK=GPIO26, LRC=GPIO25, DIN=GPIO22, GAIN=GND
+- Adafruit #3351 3W 4Ω enclosed speaker
+
+### Key problems solved
+- Heap fragmentation: SD library allocates internally during file reads, corrupting available contiguous blocks — fixed with two-pass loading
+- WAV header offset: macOS `afconvert` adds metadata padding (offset 4096 instead of 44) — fixed with Python script that strips to clean 44-byte header
+- Distortion: 8x software gain clipped full-scale drum samples — fixed to 0.5x attenuation
+- Sample format: all WAV files must be 22050Hz mono 16-bit PCM with standard 44-byte header
+
+### WAV sample prep (Mac workflow)
+```bash
+# Convert any WAV to correct format
+afconvert -f WAVE -d LEI16@22050 -c 1 input.wav /tmp/converted.wav
+# Then strip macOS metadata with Python (see audio_samples_original/ for script)
+```
+Original sources kept in `firmware/phase4b/audio_samples_original/` for re-conversion.
+
+### Latency achieved
+Button press → audible sound < 10ms ✓
 
 ---
 

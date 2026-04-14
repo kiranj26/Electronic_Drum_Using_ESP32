@@ -225,6 +225,11 @@ https://github.com/user-attachments/assets/dd6a18f4-1137-4b9d-854d-ca3681d37620
 
 https://github.com/user-attachments/assets/d413f8be-6853-4fed-81b4-6168fe795195
 
+### Phase 4 - Physical Buttons → Amplifier → Speaker
+
+https://github.com/user-attachments/assets/164722a4-a0ad-4758-9e7e-273e6b227607
+
+
 ---
 
 ## Hardware BOM by Phase

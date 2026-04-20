@@ -189,6 +189,11 @@ Button press → audible sound < 10ms ✓
 | Phase 2 WAV delivery | Base64 in HTML | Single file, no SPIFFS complexity |
 | iOS AudioContext fix | resume() before every play() | iOS suspends AudioContext when page not touched — WebSocket triggers were silent without this |
 | Sample format | 22050Hz 16-bit mono WAV | Compact, low decode cost |
+| Phase 4b WAV loader | Two-pass (probe → alloc → read) | SD library allocs during file reads fragment heap, causing malloc failures for later large files |
+| Phase 4b I2S format | ONLY_RIGHT channel | MAX98357A mono amp needs single-channel data; stereo format caused silence |
+| Phase 4b gain | 0.5x software attenuation | GAIN=GND = +15dB hardware gain; drum samples are full-scale — 1x or above causes speaker distortion |
+| Phase 4b debounce | 50ms | 30ms still caused double-triggers on kick/snare with tactile buttons |
+| Phase 4b WAV header | Python strip to 44-byte | macOS afconvert adds metadata chunk (offset 4096) — firmware parser expects standard 44-byte offset |
 
 ---
 
@@ -202,7 +207,23 @@ Button press → audible sound < 10ms ✓
 | Hi-Hat Open | `HIHAT_OPEN` | GPIO 13 | Yellow |
 | Low Tom | `TOM_LOW` | GPIO 14 | Blue |
 | Mid Tom | `TOM_MID` | GPIO 15 | Blue |
-| Crash | `CRASH` | GPIO 18 | Orange |
+| Crash | `CRASH` | GPIO 18 → **GPIO 32** (Phase 4a+) | Orange |
+
+> Note: SNARE remapped GPIO 5 → 33, CRASH remapped GPIO 18 → 32 in Phase 4a to free SPI pins for SD card.
+
+---
+
+## Phase 5 — OLED + Kit Switching (NEXT UP)
+
+Show current kit name and hit indicator on a 0.96" OLED display. Support multiple drum kit sample sets switchable via button.
+
+### Hardware ordered
+- Adafruit #4440 Monochrome 128x64 OLED (I2C, STEMMA QT)
+
+### Goals
+- Display kit name on OLED at boot and on hit
+- Switch between kits (Rock / Electronic / Jazz) via dedicated button
+- Visual hit feedback — pad name flashes on OLED when triggered
 
 ---
 

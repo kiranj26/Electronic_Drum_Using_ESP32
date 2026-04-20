@@ -187,14 +187,31 @@ Boot → SPI → SD card → read 8 WAV files → validate → heap buffers → 
 
 ---
 
-### Phase 4b — I2S Amp + Speaker Audio
-**Branch:** `phase-4b-i2s-audio` | **Hardware:** + MAX98357A amp + 3W speaker (to purchase)
+### Phase 4b — I2S Amp + Speaker Audio ✅ Complete
+**Branch:** `phase-4b-i2s-audio` | **Hardware:** + MAX98357A I2S amp + Adafruit #3351 3W 4Ω speaker
 
-Route WAV buffers loaded in Phase 4a through an I2S amplifier to a real speaker. Fully standalone — no phone, no laptop.
+Routes WAV buffers from Phase 4a through a MAX98357A Class D I2S amplifier to a physical speaker. Fully standalone — no phone, no laptop, no WiFi required.
 
 ```
-Button press → ESP32 → I2S DMA → MAX98357A → speaker  (no phone, no laptop)
+Button press → ESP32 ISR → InputTask (Core 1) → AudioTask (Core 0) → I2S DMA → MAX98357A → speaker
 ```
+
+**Key technical details:**
+- 4-voice polyphonic mixer — simultaneous hits mix cleanly
+- Two-pass WAV loader prevents heap fragmentation from SD I/O
+- 0.5x software attenuation balances hardware +15dB amp gain
+- 50ms debounce eliminates double-triggers on tactile buttons
+- WAV samples: 22050Hz 16-bit mono, standard 44-byte header required
+
+**I2S wiring:**
+| MAX98357A | ESP32 |
+|---|---|
+| DIN | GPIO 22 |
+| BCLK | GPIO 26 |
+| LRC | GPIO 25 |
+| GAIN | GND (+15dB) |
+| VIN | 3V3 |
+
 #### Phase 4b Demo
 
 https://github.com/user-attachments/assets/b0563da3-9379-4325-9881-f0377f5ed5b3
@@ -244,9 +261,9 @@ https://github.com/user-attachments/assets/164722a4-a0ad-4758-9e7e-273e6b227607
 | iPhone (any) | Phase 2 | ✅ | — |
 | Adafruit microSD card breakout | Phase 4a | ✅ | ~$8 |
 | MicroSD card (any size) | Phase 4a | ✅ | — |
-| MAX98357A I2S amp module | Phase 4b | ❌ | ~$3 |
-| Speaker 3W 8Ω | Phase 4b | ❌ | ~$4 |
-| OLED 0.96" I2C | Phase 5 | ❌ | ~$4 |
+| MAX98357A I2S amp module | Phase 4b | ✅ | ~$3 |
+| Adafruit #3351 3W 4Ω speaker | Phase 4b | ✅ | ~$4 |
+| OLED 0.96" I2C (Adafruit #4440) | Phase 5 | ✅ ordered | ~$4 |
 | Project enclosure | Phase 6 | ❌ | ~$5–15 |
 | **Phase 2 total** | | | **$0** |
 | **Full build total** | | | **~$28–40** |
@@ -267,7 +284,10 @@ Electronic_Drum_Using_ESP32/
 │   ├── phase0/                  ← UART command echo sketch
 │   ├── phase1/                  ← Button ISR + UART
 │   ├── phase2/                  ← WiFi AP + WebSocket + SPIFFS
-│   └── phase3/                  ← FreeRTOS dual-core (WiFi=Core0, Input=Core1)
+│   ├── phase3/                  ← FreeRTOS dual-core (WiFi=Core0, Input=Core1)
+│   ├── phase4a/                 ← SD card WAV loading + validation
+│   └── phase4b/                 ← I2S amp + speaker audio (standalone)
+│       └── audio_samples_original/  ← Source WAV files for re-conversion
 └── web_app/
     ├── phase0/                  ← Chrome Web Serial + Web Audio app
     └── phase2/                  ← iPhone web app template + bundle script
@@ -284,6 +304,6 @@ Electronic_Drum_Using_ESP32/
 | Phase 2 — WiFi AP + iPhone Audio | ✅ Complete | `phase-2-wifi-ap` |
 | Phase 3 — FreeRTOS Dual-Core Split | ✅ Complete | `phase-3-polyphony` |
 | Phase 4a — SD Card WAV Loading | ✅ Complete | `phase-4a-sd-card` |
-| Phase 4b — I2S Amp + Speaker Audio | Not started | `phase-4b-i2s-audio` |
+| Phase 4b — I2S Amp + Speaker Audio | ✅ Complete | `phase-4b-i2s-audio` |
 | Phase 5 — OLED + Kit Switch | Not started | `phase-5-display` |
 | Phase 6 — Enclosure | Not started | `phase-6-enclosure` |

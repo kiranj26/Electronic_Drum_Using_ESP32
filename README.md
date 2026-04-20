@@ -249,6 +249,14 @@ https://github.com/user-attachments/assets/164722a4-a0ad-4758-9e7e-273e6b227607
 
 ---
 
+## Wiring Diagram — Phase 4b (current)
+
+![Phase 4b Wiring Diagram](docs/wiring/phase4b_wiring.svg)
+
+> **Regenerate:** `python3 docs/wiring/generate_wiring.py` — run this after each phase to update the diagram.
+
+---
+
 ## Hardware BOM by Phase
 
 | Component | Phase needed | Have it? | Est. Cost |

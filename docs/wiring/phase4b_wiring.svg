@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920">
+<rect x="0" y="0" width="1500" height="920" fill="#0d1117" stroke="#0d1117" stroke-width="1.5" rx="0"/>
+<rect x="0" y="0" width="1500" height="54" fill="#1a2332" stroke="#58a6ff" stroke-width="0" rx="0"/>
+<text x="750" y="24" font-size="18" fill="#58a6ff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">ESP32 Digital Drum Kit</text>
+<text x="750" y="44" font-size="11" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">Phase 4b — Wiring Diagram  |  SD Card + I2S Amp + Speaker + 7 Buttons</text>
+<rect x="120" y="80" width="190" height="220" fill="#161b22" stroke="#30363d" stroke-width="1.5" rx="8"/>
+<text x="215" y="102" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">MicroSD Breakout</text>
+<text x="215" y="118" font-size="10" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">Adafruit SPI Module</text>
+<circle cx="310" cy="140" r="3.5" fill="#ff6b6b"/>
+<text x="302" y="144" font-size="10" fill="#ff6b6b" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">VCC</text>
+<text x="302" y="155" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">3V3</text>
+<circle cx="310" cy="165" r="3.5" fill="#666666"/>
+<text x="302" y="169" font-size="10" fill="#666666" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<text x="302" y="180" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GND</text>
+<circle cx="310" cy="190" r="3.5" fill="#ffd93d"/>
+<text x="302" y="194" font-size="10" fill="#ffd93d" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">CLK</text>
+<text x="302" y="205" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 18</text>
+<circle cx="310" cy="215" r="3.5" fill="#ffd93d"/>
+<text x="302" y="219" font-size="10" fill="#ffd93d" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">MOSI</text>
+<text x="302" y="230" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 23</text>
+<circle cx="310" cy="240" r="3.5" fill="#ffd93d"/>
+<text x="302" y="244" font-size="10" fill="#ffd93d" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">MISO</text>
+<text x="302" y="255" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 19</text>
+<circle cx="310" cy="265" r="3.5" fill="#ffd93d"/>
+<text x="302" y="269" font-size="10" fill="#ffd93d" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">CS</text>
+<text x="302" y="280" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 5</text>
+<rect x="600" y="80" width="210" height="580" fill="#1a2332" stroke="#58a6ff" stroke-width="2" rx="8"/>
+<text x="705" y="102" font-size="15" fill="#58a6ff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">ESP32</text>
+<text x="705" y="120" font-size="10" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">DevKit V1</text>
+<rect x="630" y="135" width="150" height="470" fill="#0d1117" stroke="#30363d" stroke-width="1" rx="4"/>
+<text x="705" y="360" font-size="11" fill="#30363d" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">ESP32</text>
+<text x="705" y="378" font-size="9" fill="#30363d" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">WROOM-32</text>
+<circle cx="600" cy="150" r="3.5" fill="#ff6b6b"/>
+<text x="608" y="154" font-size="10" fill="#ff6b6b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">3V3</text>
+<text x="608" y="165" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">power</text>
+<circle cx="600" cy="180" r="3.5" fill="#666666"/>
+<text x="608" y="184" font-size="10" fill="#666666" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<text x="608" y="195" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">power</text>
+<circle cx="600" cy="240" r="3.5" fill="#ffd93d"/>
+<text x="608" y="244" font-size="10" fill="#ffd93d" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D5</text>
+<text x="608" y="255" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">SD CS</text>
+<circle cx="600" cy="270" r="3.5" fill="#ffd93d"/>
+<text x="608" y="274" font-size="10" fill="#ffd93d" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D18</text>
+<text x="608" y="285" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">SD SCK</text>
+<circle cx="600" cy="300" r="3.5" fill="#ffd93d"/>
+<text x="608" y="304" font-size="10" fill="#ffd93d" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D19</text>
+<text x="608" y="315" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">SD MISO</text>
+<circle cx="600" cy="330" r="3.5" fill="#ffd93d"/>
+<text x="608" y="334" font-size="10" fill="#ffd93d" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D23</text>
+<text x="608" y="345" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">SD MOSI</text>
+<circle cx="600" cy="420" r="3.5" fill="#6bd96b"/>
+<text x="608" y="424" font-size="10" fill="#6bd96b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D4</text>
+<text x="608" y="435" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">KICK</text>
+<circle cx="600" cy="450" r="3.5" fill="#6bd96b"/>
+<text x="608" y="454" font-size="10" fill="#6bd96b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D12</text>
+<text x="608" y="465" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">HH CLO</text>
+<circle cx="600" cy="480" r="3.5" fill="#6bd96b"/>
+<text x="608" y="484" font-size="10" fill="#6bd96b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D13</text>
+<text x="608" y="495" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">HH OPN</text>
+<circle cx="600" cy="510" r="3.5" fill="#6bd96b"/>
+<text x="608" y="514" font-size="10" fill="#6bd96b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D14</text>
+<text x="608" y="525" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">TOM L</text>
+<circle cx="600" cy="540" r="3.5" fill="#6bd96b"/>
+<text x="608" y="544" font-size="10" fill="#6bd96b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D15</text>
+<text x="608" y="555" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">TOM M</text>
+<circle cx="600" cy="610" r="3.5" fill="#6bcbff"/>
+<text x="608" y="614" font-size="10" fill="#6bcbff" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">D22</text>
+<text x="608" y="625" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">I2S DIN</text>
+<circle cx="810" cy="150" r="3.5" fill="#ff6b6b"/>
+<text x="802" y="154" font-size="10" fill="#ff6b6b" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">3V3</text>
+<text x="802" y="165" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">power</text>
+<circle cx="810" cy="180" r="3.5" fill="#666666"/>
+<text x="802" y="184" font-size="10" fill="#666666" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<text x="802" y="195" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">power</text>
+<circle cx="810" cy="240" r="3.5" fill="#6bcbff"/>
+<text x="802" y="244" font-size="10" fill="#6bcbff" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">D25</text>
+<text x="802" y="255" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">I2S LRC</text>
+<circle cx="810" cy="270" r="3.5" fill="#6bcbff"/>
+<text x="802" y="274" font-size="10" fill="#6bcbff" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">D26</text>
+<text x="802" y="285" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">I2S BCLK</text>
+<circle cx="810" cy="390" r="3.5" fill="#6bd96b"/>
+<text x="802" y="394" font-size="10" fill="#6bd96b" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">D33</text>
+<text x="802" y="405" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">SNARE</text>
+<circle cx="810" cy="420" r="3.5" fill="#6bd96b"/>
+<text x="802" y="424" font-size="10" fill="#6bd96b" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">D32</text>
+<text x="802" y="435" font-size="9" fill="#8b949e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">CRASH</text>
+<rect x="1100" y="80" width="190" height="240" fill="#161b22" stroke="#30363d" stroke-width="1.5" rx="8"/>
+<text x="1195" y="102" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">MAX98357A</text>
+<text x="1195" y="118" font-size="10" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">I2S Class D Amp</text>
+<circle cx="1100" cy="140" r="3.5" fill="#ff6b6b"/>
+<text x="1108" y="144" font-size="10" fill="#ff6b6b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">VIN</text>
+<text x="1108" y="155" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">3V3</text>
+<circle cx="1100" cy="165" r="3.5" fill="#666666"/>
+<text x="1108" y="169" font-size="10" fill="#666666" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<text x="1108" y="180" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GND</text>
+<circle cx="1100" cy="195" r="3.5" fill="#6bcbff"/>
+<text x="1108" y="199" font-size="10" fill="#6bcbff" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">DIN</text>
+<text x="1108" y="210" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 22</text>
+<circle cx="1100" cy="220" r="3.5" fill="#6bcbff"/>
+<text x="1108" y="224" font-size="10" fill="#6bcbff" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">BCLK</text>
+<text x="1108" y="235" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 26</text>
+<circle cx="1100" cy="245" r="3.5" fill="#6bcbff"/>
+<text x="1108" y="249" font-size="10" fill="#6bcbff" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">LRC</text>
+<text x="1108" y="260" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">GPIO 25</text>
+<circle cx="1100" cy="270" r="3.5" fill="#666666"/>
+<text x="1108" y="274" font-size="10" fill="#666666" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">GAIN</text>
+<text x="1108" y="285" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">→ GND</text>
+<circle cx="1100" cy="295" r="3.5" fill="#ff6b6b"/>
+<text x="1108" y="299" font-size="10" fill="#ff6b6b" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">SD</text>
+<text x="1108" y="310" font-size="9" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">→ 3V3</text>
+<circle cx="1290" cy="170" r="3.5" fill="#ffaa5e"/>
+<text x="1282" y="174" font-size="10" fill="#ffaa5e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">OUT+</text>
+<circle cx="1290" cy="195" r="3.5" fill="#ffaa5e"/>
+<text x="1282" y="199" font-size="10" fill="#ffaa5e" text-anchor="end" font-weight="normal" style="font-family:'Courier New',monospace;">OUT−</text>
+<circle cx="1200" cy="430" r="55" fill="#161b22" stroke="#ffaa5e" stroke-width="2"/>
+<circle cx="1200" cy="430" r="40" fill="none" stroke="#30363d" stroke-width="1"/>
+<circle cx="1200" cy="430" r="28" fill="none" stroke="#30363d" stroke-width="1"/>
+<circle cx="1200" cy="430" r="16" fill="none" stroke="#30363d" stroke-width="1"/>
+<circle cx="1200" cy="430" r="5" fill="#ffaa5e"/>
+<text x="1200" y="501" font-size="11" fill="#ffaa5e" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">Speaker</text>
+<text x="1200" y="515" font-size="10" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">3W 4Ω</text>
+<path d="M 1290 170 L 1330 170 L 1330 412 L 1145 412" stroke="#ffaa5e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 1290 195 L 1345 195 L 1345 448 L 1145 448" stroke="#ffaa5e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1312" y="162" font-size="9" fill="#ffaa5e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">OUT+</text>
+<text x="1312" y="207" font-size="9" fill="#ffaa5e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">OUT−</text>
+<path d="M 600 150 L 250 150 L 250 140 L 310 140" stroke="#ff6b6b" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 180 L 270 180 L 270 165 L 310 165" stroke="#666666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 240 L 455 240 L 455 265 L 310 265" stroke="#ffd93d" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 270 L 455 270 L 455 190 L 310 190" stroke="#ffd93d" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 300 L 455 300 L 455 240 L 310 240" stroke="#ffd93d" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 330 L 455 330 L 455 215 L 310 215" stroke="#ffd93d" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="340" y="170" width="80" height="20" fill="#161b22" stroke="#ffd93d" stroke-width="1" rx="4"/>
+<text x="380" y="184" font-size="10" fill="#ffd93d" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">SPI Bus</text>
+<path d="M 810 150 L 870 150 L 870 140 L 1100 140" stroke="#ff6b6b" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 810 180 L 850 180 L 850 165 L 1100 165" stroke="#666666" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 600 610 L 570 610 L 570 690 L 1040 690 L 1040 195 L 1100 195" stroke="#6bcbff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 810 270 L 955 270 L 955 220 L 1100 220" stroke="#6bcbff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 810 240 L 955 240 L 955 245 L 1100 245" stroke="#6bcbff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="870" y="270" width="80" height="20" fill="#161b22" stroke="#6bcbff" stroke-width="1" rx="4"/>
+<text x="910" y="284" font-size="10" fill="#6bcbff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">I2S Bus</text>
+<path d="M 1100 270 L 1070 270 L 1070 300" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1070" cy="300" r="3.5" fill="#666666"/>
+<text x="1062" y="314" font-size="9" fill="#666666" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<text x="1062" y="325" font-size="8" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">+15dB</text>
+<rect x="130" y="740" width="70" height="50" fill="#161b22" stroke="#ff6b6b" stroke-width="1.5" rx="6"/>
+<text x="165" y="758" font-size="10" fill="#ff6b6b" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">KICK</text>
+<text x="165" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 4</text>
+<circle cx="165" cy="790" r="3" fill="#666666"/>
+<path d="M 165 740 L 165 430 L 600 430 L 600 420" stroke="#ff6b6b" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="230" y="740" width="70" height="50" fill="#161b22" stroke="#ffffff" stroke-width="1.5" rx="6"/>
+<text x="265" y="758" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">SNARE</text>
+<text x="265" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 33</text>
+<circle cx="265" cy="790" r="3" fill="#666666"/>
+<path d="M 265 740 L 265 400 L 810 400 L 810 390" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="330" y="740" width="70" height="50" fill="#161b22" stroke="#ffd93d" stroke-width="1.5" rx="6"/>
+<text x="365" y="758" font-size="10" fill="#ffd93d" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">HH CLO</text>
+<text x="365" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 12</text>
+<circle cx="365" cy="790" r="3" fill="#666666"/>
+<path d="M 365 740 L 365 460 L 600 460 L 600 450" stroke="#ffd93d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="430" y="740" width="70" height="50" fill="#161b22" stroke="#ffd93d" stroke-width="1.5" rx="6"/>
+<text x="465" y="758" font-size="10" fill="#ffd93d" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">HH OPN</text>
+<text x="465" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 13</text>
+<circle cx="465" cy="790" r="3" fill="#666666"/>
+<path d="M 465 740 L 465 490 L 600 490 L 600 480" stroke="#ffd93d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="530" y="740" width="70" height="50" fill="#161b22" stroke="#6bcbff" stroke-width="1.5" rx="6"/>
+<text x="565" y="758" font-size="10" fill="#6bcbff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">TOM L</text>
+<text x="565" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 14</text>
+<circle cx="565" cy="790" r="3" fill="#666666"/>
+<path d="M 565 740 L 565 520 L 600 520 L 600 510" stroke="#6bcbff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="630" y="740" width="70" height="50" fill="#161b22" stroke="#6bcbff" stroke-width="1.5" rx="6"/>
+<text x="665" y="758" font-size="10" fill="#6bcbff" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">TOM M</text>
+<text x="665" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 15</text>
+<circle cx="665" cy="790" r="3" fill="#666666"/>
+<path d="M 665 740 L 665 550 L 600 550 L 600 540" stroke="#6bcbff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="730" y="740" width="70" height="50" fill="#161b22" stroke="#ffaa5e" stroke-width="1.5" rx="6"/>
+<text x="765" y="758" font-size="10" fill="#ffaa5e" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">CRASH</text>
+<text x="765" y="772" font-size="9" fill="#8b949e" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO 32</text>
+<circle cx="765" cy="790" r="3" fill="#666666"/>
+<path d="M 765 740 L 765 430 L 810 430 L 810 420" stroke="#ffaa5e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="100" y="810" width="730" height="6" fill="#666666" stroke="#666666" stroke-width="0" rx="3"/>
+<text x="835" y="818" font-size="10" fill="#666666" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;">GND (shared)</text>
+<path d="M 165 790 L 165 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 265 790 L 265 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 365 790 L 365 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 465 790 L 465 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 565 790 L 565 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 665 790 L 665 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 765 790 L 765 813" stroke="#666666" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1060" y="560" width="380" height="200" fill="#161b22" stroke="#30363d" stroke-width="1" rx="8"/>
+<text x="1250" y="580" font-size="12" fill="#e6edf3" text-anchor="middle" font-weight="bold" style="font-family:'Courier New',monospace;">Wire Legend</text>
+<line x1="1080" y1="605" x2="1110" y2="605" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="605" r="3" fill="#ff6b6b"/>
+<circle cx="1110" cy="605" r="3" fill="#ff6b6b"/>
+<text x="1120" y="609" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">3V3 Power</text>
+<line x1="1080" y1="631" x2="1110" y2="631" stroke="#666666" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="631" r="3" fill="#666666"/>
+<circle cx="1110" cy="631" r="3" fill="#666666"/>
+<text x="1120" y="635" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">GND</text>
+<line x1="1080" y1="657" x2="1110" y2="657" stroke="#ffd93d" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="657" r="3" fill="#ffd93d"/>
+<circle cx="1110" cy="657" r="3" fill="#ffd93d"/>
+<text x="1120" y="661" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">SPI Bus (SD Card)</text>
+<line x1="1080" y1="683" x2="1110" y2="683" stroke="#6bcbff" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="683" r="3" fill="#6bcbff"/>
+<circle cx="1110" cy="683" r="3" fill="#6bcbff"/>
+<text x="1120" y="687" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">I2S Bus (Audio)</text>
+<line x1="1080" y1="709" x2="1110" y2="709" stroke="#6bd96b" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="709" r="3" fill="#6bd96b"/>
+<circle cx="1110" cy="709" r="3" fill="#6bd96b"/>
+<text x="1120" y="713" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">GPIO (Buttons)</text>
+<line x1="1080" y1="735" x2="1110" y2="735" stroke="#ffaa5e" stroke-width="2.5" stroke-linecap="round"/>
+<circle cx="1080" cy="735" r="3" fill="#ffaa5e"/>
+<circle cx="1110" cy="735" r="3" fill="#ffaa5e"/>
+<text x="1120" y="739" font-size="11" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;">Audio Output</text>
+<text x="60" y="830" font-size="11" fill="#8b949e" text-anchor="start" font-weight="bold" style="font-family:'Courier New',monospace;">GPIO Reference:</text>
+<text x="60" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D4=KICK</text>
+<text x="260" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D12=HH_CLO</text>
+<text x="460" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D13=HH_OPN</text>
+<text x="660" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D14=TOM_L</text>
+<text x="860" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D15=TOM_M</text>
+<text x="1060" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D32=CRASH</text>
+<text x="1260" y="850" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D33=SNARE</text>
+<text x="60" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D5=SD_CS</text>
+<text x="260" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D18=SD_SCK</text>
+<text x="460" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D19=SD_MISO</text>
+<text x="660" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D23=SD_MOSI</text>
+<text x="860" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D22=I2S_DIN</text>
+<text x="1060" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D25=I2S_LRC</text>
+<text x="1260" y="868" font-size="10" fill="#8b949e" text-anchor="start" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">D26=I2S_BCLK</text>
+<text x="750" y="908" font-size="10" fill="#30363d" text-anchor="middle" font-weight="normal" style="font-family:'Courier New',monospace;font-style:italic;">github.com/kiranj26/Electronic_Drum_Using_ESP32  |  Phase 4b  |  Auto-generated by docs/wiring/generate_wiring.py</text>
+</svg>

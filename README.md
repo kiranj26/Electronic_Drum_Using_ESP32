@@ -1,7 +1,10 @@
 # ESP32 Digital Drum Kit
 
-A progressive hardware + software drum machine built on the ESP32-M1 DevKit.  
-Each phase adds capability — from a zero-hardware browser demo to a fully wireless instrument you play with physical buttons, no cables, no laptop.
+A 7-button, 8-sample, 4-voice polyphonic drum kit running entirely on an ESP32.
+No phone. No laptop. No WiFi. Press a button, hear a drum.
+
+WAV samples loaded from SD card at boot, mixed in real time, and pushed through
+I2S DMA to a Class D amplifier and speaker. End-to-end latency under 10ms.
 
 ---
 
